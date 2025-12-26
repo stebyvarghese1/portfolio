@@ -650,9 +650,9 @@ section {
     transform: translateY(-50%);
     width: 60px;
     height: 60px;
-    background: rgba(10, 10, 32, 0.6);
+    background: rgba(10, 10, 32, 0.8);
     backdrop-filter: blur(15px);
-    border: 1px solid var(--primary);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     border-radius: 50%;
     display: flex;
     align-items: center;
@@ -662,62 +662,64 @@ section {
     pointer-events: auto;
     opacity: 0;
     cursor: pointer;
-    transition: all 0.4s var(--transition);
-    box-shadow: 0 0 30px rgba(0, 242, 254, 0.2);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
 
 .scroll-hint:hover {
     background: var(--primary);
     color: #000;
-    box-shadow: 0 0 40px var(--primary);
-    transform: translateY(-50%) scale(1.1);
+    box-shadow: 0 0 30px var(--primary);
+    transform: translateY(-50%) scale(1.15);
+}
+
+.scroll-hint:active {
+    transform: translateY(-50%) scale(0.95);
 }
 
 .scroll-hint.visible {
     opacity: 1;
+    animation: floating 3s ease-in-out infinite;
+}
+
+.scroll-hint.visible:hover {
+    animation: none;
 }
 
 .hint-left {
-    left: -80px;
-    animation: slideInLeft 1.5s infinite alternate var(--transition);
+    left: -100px;
 }
 
 .hint-right {
-    right: -80px;
-    animation: slideInRight 1.5s infinite alternate var(--transition);
+    right: -100px;
+}
+
+@keyframes floating {
+
+    0%,
+    100% {
+        transform: translateY(-50%);
+    }
+
+    50% {
+        transform: translateY(calc(-50% - 10px));
+    }
 }
 
 @media (max-width: 1100px) {
     .hint-left {
-        left: 10px;
+        left: 0;
+        background: rgba(0, 0, 0, 0.8);
     }
 
     .hint-right {
-        right: 10px;
-    }
-}
-
-@keyframes slideInLeft {
-    from {
-        transform: translateY(-50%) translateX(-10px);
-        opacity: 0;
+        right: 0;
+        background: rgba(0, 0, 0, 0.8);
     }
 
-    to {
-        transform: translateY(-50%) translateX(10px);
-        opacity: 0.8;
-    }
-}
-
-@keyframes slideInRight {
-    from {
-        transform: translateY(-50%) translateX(10px);
-        opacity: 0;
-    }
-
-    to {
-        transform: translateY(-50%) translateX(-10px);
-        opacity: 0.8;
+    .scroll-hint {
+        width: 50px;
+        height: 50px;
     }
 }
 
