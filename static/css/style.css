@@ -96,8 +96,9 @@ h4 {
 nav {
     position: fixed;
     top: 1.5rem;
-    left: 50%;
-    transform: translateX(-50%);
+    left: 0;
+    right: 0;
+    margin: 0 auto;
     width: 90%;
     max-width: 1200px;
     padding: 0.75rem 2rem;
@@ -602,7 +603,7 @@ textarea:focus {
     .nav-links {
         position: fixed;
         top: 0;
-        right: -100%;
+        right: 0;
         width: 100%;
         height: 100vh;
         background: radial-gradient(circle at top right, #1a1a3a, var(--bg-darker));
@@ -614,10 +615,16 @@ textarea:focus {
         z-index: 1000;
         padding: 6rem 2rem 2rem 2rem;
         border-radius: 0;
+        transform: translateX(100%);
+        visibility: hidden;
+        pointer-events: none;
+        overflow-y: auto;
     }
 
     .nav-links.active {
-        right: 0;
+        transform: translateX(0);
+        visibility: visible;
+        pointer-events: all;
     }
 
     .mobile-menu-header {
@@ -724,8 +731,10 @@ textarea:focus {
 
     nav {
         width: 92%;
-        left: 50%;
-        transform: translateX(-50%);
+        left: 0;
+        right: 0;
+        margin: 0 auto;
+        transform: none;
         justify-content: space-between;
         border-radius: 100px;
         padding: 0.6rem 1.5rem;
