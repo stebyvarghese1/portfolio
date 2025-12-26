@@ -143,6 +143,7 @@
                     </div>
                     {% endfor %}
                 </div>
+                <div class="dots-container"></div>
             </div>
         </section>
 
@@ -163,6 +164,7 @@
                     </div>
                     {% endfor %}
                 </div>
+                <div class="dots-container"></div>
             </div>
         </section>
 
@@ -310,6 +312,7 @@
             const container = el.parentElement;
             const hintLeft = container.querySelector('.hint-left');
             const hintRight = container.querySelector('.hint-right');
+            const dotsContainer = container.querySelector('.dots-container');
 
             const updateHints = () => {
                 const maxScroll = el.scrollWidth - el.clientWidth;
@@ -318,6 +321,21 @@
             };
 
             el.addEventListener('scroll', updateHints);
+
+            // Generate Dots
+            const cards = el.querySelectorAll('.glass-card');
+            if (dotsContainer) {
+                dotsContainer.innerHTML = '';
+                cards.forEach((card, index) => {
+                    const dot = document.createElement('div');
+                    dot.classList.add('dot');
+                    if (index === 0) dot.classList.add('active');
+                    dot.addEventListener('click', () => {
+                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+                    });
+                    dotsContainer.appendChild(dot);
+                });
+            }
 
             // Intersection Observer to detect centered element
             const observerOptions = {
@@ -336,6 +354,13 @@
                         entry.target.classList.add('is-centered');
                         if (items[index - 1]) items[index - 1].classList.add('is-prev');
                         if (items[index + 1]) items[index + 1].classList.add('is-next');
+
+                        // Update Dots
+                        if (dotsContainer) {
+                            const dots = dotsContainer.querySelectorAll('.dot');
+                            dots.forEach(d => d.classList.remove('active'));
+                            if (dots[index]) dots[index].classList.add('active');
+                        }
 
                         ticTacSound();
                     }
