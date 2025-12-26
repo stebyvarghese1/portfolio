@@ -204,7 +204,7 @@
                             </div>
                         </div>
                     </div>
-                    <form id="contact-form" action="https://formspree.io/f/stebyvarghese1@gmail.com" method="POST"
+                    <form id="contact-form" action="https://formspree.io/f/mdklnejr" method="POST"
                         style="display: flex; flex-direction: column; gap: 1.2rem;">
                         <input type="text" name="name" placeholder="Your Name" required>
                         <input type="email" name="email" placeholder="Your Email" required>
@@ -328,11 +328,15 @@
             const observer = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     if (entry.isIntersecting) {
-                        const items = el.querySelectorAll('.glass-card');
-                        items.forEach(item => item.classList.remove('is-centered'));
-                        entry.target.classList.add('is-centered');
+                        const items = Array.from(el.querySelectorAll('.glass-card'));
+                        const index = items.indexOf(entry.target);
 
-                        // Play sound when snapping into focus
+                        items.forEach(item => item.classList.remove('is-centered', 'is-prev', 'is-next'));
+
+                        entry.target.classList.add('is-centered');
+                        if (items[index - 1]) items[index - 1].classList.add('is-prev');
+                        if (items[index + 1]) items[index + 1].classList.add('is-next');
+
                         ticTacSound();
                     }
                 });
@@ -343,8 +347,20 @@
             updateHints();
             window.addEventListener('resize', updateHints);
 
-            hintLeft?.addEventListener('click', () => el.scrollBy({ left: -300, behavior: 'smooth' }));
-            hintRight?.addEventListener('click', () => el.scrollBy({ left: 300, behavior: 'smooth' }));
+            const getScrollAmount = () => {
+                const card = el.querySelector('.glass-card');
+                if (!card) return 300;
+                const style = window.getComputedStyle(el);
+                const gap = parseInt(style.gap) || 0;
+                return card.offsetWidth + gap;
+            };
+
+            hintLeft?.addEventListener('click', () => {
+                el.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
+            });
+            hintRight?.addEventListener('click', () => {
+                el.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
+            });
 
             let isDown = false;
             let startX;
@@ -352,17 +368,29 @@
 
             el.addEventListener('mousedown', (e) => {
                 isDown = true;
-                el.classList.add('active');
+                el.style.cursor = 'grabbing';
+                el.style.scrollSnapType = 'none';
+                el.style.scrollBehavior = 'auto';
                 startX = e.pageX - el.offsetLeft;
                 scrollLeft = el.scrollLeft;
             });
-            el.addEventListener('mouseleave', () => isDown = false);
-            el.addEventListener('mouseup', () => isDown = false);
+
+            const stopDragging = () => {
+                if (!isDown) return;
+                isDown = false;
+                el.style.cursor = 'grab';
+                el.style.scrollSnapType = 'x mandatory';
+                el.style.scrollBehavior = 'smooth';
+            };
+
+            el.addEventListener('mouseleave', stopDragging);
+            el.addEventListener('mouseup', stopDragging);
+
             el.addEventListener('mousemove', (e) => {
                 if (!isDown) return;
                 e.preventDefault();
                 const x = e.pageX - el.offsetLeft;
-                const walk = (x - startX) * 2;
+                const walk = (x - startX) * 1.5;
                 el.scrollLeft = scrollLeft - walk;
             });
         }
