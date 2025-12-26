@@ -204,12 +204,14 @@
                             </div>
                         </div>
                     </div>
-                    <form action="#" method="POST" style="display: flex; flex-direction: column; gap: 1.2rem;">
-                        <input type="text" placeholder="Your Name" required>
-                        <input type="email" placeholder="Your Email" required>
-                        <textarea rows="4" placeholder="Your Message" required></textarea>
-                        <button type="submit" class="btn btn-primary" style="justify-content: center;">Send
-                            Message</button>
+                    <form id="contact-form" action="https://formspree.io/f/stebyvarghese1@gmail.com" method="POST"
+                        style="display: flex; flex-direction: column; gap: 1.2rem;">
+                        <input type="text" name="name" placeholder="Your Name" required>
+                        <input type="email" name="email" placeholder="Your Email" required>
+                        <textarea name="message" rows="4" placeholder="Your Message" required></textarea>
+                        <button type="submit" id="submit-btn" class="btn btn-primary" style="justify-content: center;">
+                            <span>Send Message</span>
+                        </button>
                     </form>
                 </div>
             </div>
@@ -367,6 +369,46 @@
 
         initHorizontalScroll('projects-scroll');
         initHorizontalScroll('skills-scroll');
+
+        // Contact Form Handler
+        const contactForm = document.getElementById('contact-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Sending...</span>';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(contactForm.action, {
+                    method: 'POST',
+                    body: new FormData(contactForm),
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (response.ok) {
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> <span>Message Sent!</span>';
+                    submitBtn.style.background = 'linear-gradient(135deg, #00b09b, #96c93d)';
+                    contactForm.reset();
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.style.background = '';
+                        submitBtn.disabled = false;
+                    }, 5000);
+                } else {
+                    throw new Error();
+                }
+            } catch (err) {
+                submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span>Error! Try again.</span>';
+                submitBtn.style.background = '#ff4b2b';
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.style.background = '';
+                    submitBtn.disabled = false;
+                }, 3000);
+            }
+        });
     </script>
 </body>
 
