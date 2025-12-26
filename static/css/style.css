@@ -602,6 +602,34 @@ section {
     display: none;
 }
 
+.dots-container {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-top: 2rem;
+    z-index: 10;
+    position: relative;
+}
+
+.dot {
+    width: 8px;
+    height: 8px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    cursor: pointer;
+    transition: all 0.3s var(--transition);
+}
+
+.dot.active {
+    background: var(--primary);
+    transform: scale(1.4);
+    box-shadow: 0 0 10px var(--primary);
+}
+
+.dot:hover {
+    background: rgba(255, 255, 255, 0.5);
+}
+
 .skill-card {
     flex: 0 0 100%;
     scroll-snap-align: center;
