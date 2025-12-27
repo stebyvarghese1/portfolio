@@ -526,7 +526,7 @@ section {
 
 @media (max-width: 968px) {
     .projects-container {
-        max-width: calc(100% - 120px);
+        max-width: calc(100% - 100px);
     }
 }
 
@@ -748,6 +748,16 @@ section {
     .scroll-hint {
         width: 45px;
         height: 45px;
+    }
+}
+
+@media (max-width: 968px) {
+    .hint-left {
+        background: rgba(10, 10, 32, 0.9);
+    }
+
+    .hint-right {
+        background: rgba(10, 10, 32, 0.9);
     }
 }
 
