@@ -21,6 +21,14 @@ if database_url:
     # SQL Alchemy requires postgresql:// instead of postgres://
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
+    
+    # Ensure sslmode=require for production environments like Render
+    if 'postgresql' in database_url and 'sslmode' not in database_url:
+        if '?' in database_url:
+            database_url += '&sslmode=require'
+        else:
+            database_url += '?sslmode=require'
+            
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///portfolio.db'
