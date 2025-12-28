@@ -13,10 +13,25 @@
 
 <body style="background: var(--bg-dark);">
     <div class="admin-wrapper">
+        <!-- Mobile Header -->
+        <div class="admin-mobile-header">
+            <div class="logo">
+                <span class="text-gradient">ADMIN</span>
+            </div>
+            <button class="admin-sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
         <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo" style="margin-bottom: 3rem;">
-                <span class="text-gradient">ADMIN</span> PANEL
+        <aside class="sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <span class="text-gradient">ADMIN</span> PANEL
+                </div>
+                <button class="admin-sidebar-close" id="sidebarClose">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
 
             <nav style="position: static; padding: 0; background: transparent; display: block; filter: none;">
@@ -48,7 +63,7 @@
 
         <!-- Main Content -->
         <main class="admin-main">
-            <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 3rem;">
+            <header class="admin-flex-between" style="margin-bottom: 3rem;">
                 <div>
                     <h1 style="font-size: 2rem;">Dashboard <span class="text-gradient">Overview</span></h1>
                     <p style="color: var(--text-dim);">Manage your portfolio content</p>
@@ -77,7 +92,7 @@
                     <h3 style="margin-bottom: 2rem;"><i class="fas fa-user-circle" style="color: var(--primary);"></i>
                         Profile Settings</h3>
                     <form action="{{ url_for('update_profile') }}" method="POST">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="admin-grid-2">
                             <div class="form-group">
                                 <label>Hero Photo URL</label>
                                 <input type="text" name="photo_url" value="{{ profile.photo_url if profile else '' }}"
@@ -99,7 +114,7 @@
 
             <!-- Overview Stats -->
             <section id="overview" style="padding: 0; margin-bottom: 4rem;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1.5rem;">
+                <div class="admin-grid-stats">
                     <div class="glass-card" style="text-align: center; padding: 1.5rem;">
                         <i class="fas fa-rocket"
                             style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
@@ -126,7 +141,7 @@
                     <h3 style="margin-bottom: 2rem;"><i class="fas fa-plus-circle" style="color: var(--primary);"></i>
                         Add New Project</h3>
                     <form action="{{ url_for('add_project') }}" method="POST">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="admin-grid-2">
                             <div class="form-group">
                                 <label>Project Title</label>
                                 <input type="text" name="title" placeholder="e.g. Virtual Mouse" required>
@@ -141,7 +156,7 @@
                             <textarea name="description" rows="3" placeholder="Tell us about the project..."
                                 required></textarea>
                         </div>
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="admin-grid-2">
                             <div class="form-group">
                                 <label>Technologies (Comma separated)</label>
                                 <input type="text" name="technologies" placeholder="Python, Flask, React">
@@ -199,8 +214,7 @@
                 <div class="glass-card" style="margin-bottom: 2rem;">
                     <h3 style="margin-bottom: 2rem;"><i class="fas fa-tools" style="color: var(--primary);"></i> Add
                         Skill</h3>
-                    <form action="{{ url_for('add_skill') }}" method="POST"
-                        style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 1.5rem; align-items: end;">
+                    <form action="{{ url_for('add_skill') }}" method="POST" class="admin-grid-3-auto">
                         <div class="form-group" style="margin: 0;">
                             <label>Skill Name</label>
                             <input type="text" name="name" placeholder="e.g. Python" required>
@@ -213,10 +227,9 @@
                     </form>
                 </div>
 
-                <div class="projects-grid" style="grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));">
+                <div class="admin-grid-stats">
                     {% for skill in skills %}
-                    <div class="glass-card"
-                        style="padding: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                    <div class="glass-card admin-flex-between" style="padding: 1.5rem;">
                         <div>
                             <h4 style="margin: 0;">{{ skill.name }}</h4>
                             <p style="font-size: 0.8rem; color: var(--text-dim);">{{ skill.category }}</p>
@@ -236,7 +249,7 @@
                     <h3 style="margin-bottom: 2rem;"><i class="fas fa-graduation-cap"
                             style="color: var(--primary);"></i> Add Education</h3>
                     <form action="{{ url_for('add_education') }}" method="POST">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="admin-grid-2">
                             <div class="form-group">
                                 <label>Degree</label>
                                 <input type="text" name="degree" placeholder="e.g. Bachelor of CS" required>
@@ -255,8 +268,7 @@
                 </div>
 
                 {% for edu in education %}
-                <div class="glass-card"
-                    style="margin-bottom: 1.5rem; display: flex; justify-content: space-between; align-items: center;">
+                <div class="glass-card admin-flex-between" style="margin-bottom: 1.5rem;">
                     <div>
                         <h4 style="margin: 0;">{{ edu.degree }}</h4>
                         <p style="color: var(--primary); font-size: 0.9rem;">{{ edu.institution }}</p>
@@ -276,7 +288,7 @@
                     <h3 style="margin-bottom: 2rem;"><i class="fas fa-key" style="color: var(--primary);"></i> Update
                         Credentials</h3>
                     <form action="{{ url_for('update_credentials') }}" method="POST">
-                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem;">
+                        <div class="admin-grid-2">
                             <div class="form-group">
                                 <label>New Username</label>
                                 <input type="text" name="username"
@@ -297,9 +309,30 @@
         </main>
     </div>
     <script>
+        // Sidebar Toggle Logic
+        const sidebar = document.getElementById('adminSidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.add('active');
+        });
+
+        sidebarClose.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+        });
+
         // Sidebar active state highlights
         const navItems = document.querySelectorAll('.admin-nav-item');
         const sections = document.querySelectorAll('main section');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                if (window.innerWidth <= 968) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
 
         window.addEventListener('scroll', () => {
             let current = '';
