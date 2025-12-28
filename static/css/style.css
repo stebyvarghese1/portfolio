@@ -506,20 +506,6 @@ section {
     user-select: none;
 }
 
-@media (max-width: 768px) {
-    .project-card {
-        height: 500px;
-        padding: 2rem;
-    }
-}
-
-@media (max-width: 480px) {
-    .project-card {
-        height: 450px;
-        padding: 1.5rem;
-    }
-}
-
 .project-card.is-centered {
     opacity: 1;
     transform: scale(1) rotateY(0deg) translateZ(0);
@@ -529,19 +515,12 @@ section {
     box-shadow: 0 20px 50px rgba(0, 242, 254, 0.15);
 }
 
-/* Style cards to the left and right differently if possible via JS class */
 .project-card.is-prev {
     transform: scale(0.8) rotateY(25deg) translateZ(-200px) translateX(50px);
 }
 
 .project-card.is-next {
     transform: scale(0.8) rotateY(-25deg) translateZ(-200px) translateX(-50px);
-}
-
-@media (max-width: 968px) {
-    .projects-container {
-        max-width: calc(100% - 100px);
-    }
 }
 
 .project-img-wrapper {
@@ -551,28 +530,51 @@ section {
     border-radius: 16px;
     overflow: hidden;
     margin-bottom: 1.5rem;
-    background: rgba(0, 0, 0, 0.2);
-    box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.4);
+    background: rgba(0, 0, 0, 0.4);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.5);
+}
+
+.project-img {
+    max-width: 100%;
+    max-height: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+    transition: transform 0.6s var(--transition);
 }
 
 @media (max-width: 768px) {
+    .project-card {
+        height: 520px;
+        padding: 1.5rem;
+        transform: scale(0.9) rotateY(15deg) translateZ(-50px);
+    }
+
+    .project-card.is-prev {
+        transform: scale(0.85) rotateY(15deg) translateZ(-100px) translateX(30px);
+    }
+
+    .project-card.is-next {
+        transform: scale(0.85) rotateY(-15deg) translateZ(-100px) translateX(-30px);
+    }
+
     .project-img-wrapper {
-        height: 180px;
+        height: 200px;
     }
 }
 
 @media (max-width: 480px) {
-    .project-img-wrapper {
-        height: 150px;
+    .project-card {
+        height: 480px;
+        padding: 1.25rem;
     }
-}
 
-.project-img {
-    width: 100%;
-    height: 100%;
-    object-fit: contain;
-    transition: transform 0.6s var(--transition);
-    display: block;
+    .project-img-wrapper {
+        height: 160px;
+    }
 }
 
 .project-card:hover .project-img {
