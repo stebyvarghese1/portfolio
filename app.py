@@ -238,18 +238,21 @@ if __name__ == '__main__':
             ))
             db.session.commit()
 
-        # Create default admin if not exists
-        if not User.query.filter_by(username='admin').first():
+        # Create default admin if no users exist at all
+        if not User.query.first():
             hashed_pw = generate_password_hash('admin123')
             admin_user = User(username='admin', password=hashed_pw)
             db.session.add(admin_user)
+            db.session.commit()
             
-            # Seed initial data from resume
-            # Education
+        # Seed initial data from resume ONLY if the tables are empty
+        # Education
+        if not Education.query.first():
             db.session.add(Education(degree='Master of Computer Applications (Pursuing)', institution='CCSIT of Calicut University', duration='2024 - 2026'))
             db.session.add(Education(degree='Bachelor of Computer Applications', institution='Yuvakshetra institute of management studies', duration='2021 - 2024'))
             
-            # Skills
+        # Skills
+        if not Skill.query.first():
             skills_data = [
                 ('Python', 'Programming'), ('HTML', 'Programming'), ('CSS', 'Programming'),
                 ('Flask', 'Frameworks'), ('Django', 'Frameworks'), ('Kivy', 'Frameworks'),
@@ -258,7 +261,8 @@ if __name__ == '__main__':
             for name, cat in skills_data:
                 db.session.add(Skill(name=name, category=cat))
             
-            # Projects
+        # Projects
+        if not Project.query.first():
             db.session.add(Project(
                 title='Virtual Mouse Using Hand Gestures',
                 description='Real-time computer vision–driven virtual mouse using MediaPipe and OpenCV.',
@@ -280,15 +284,16 @@ if __name__ == '__main__':
                 image_url='https://images.unsplash.com/photo-1516035069371-29a1b244cc32?auto=format&fit=crop&q=80&w=800',
                 link='#'
             ))
-
-            # Initial Profile
-            db.session.add(Profile(
-                photo_url='/static/img/favicon_icon_1766679969783.png',
-                about_image_url='/static/img/favicon_icon_1766679969783.png',
-                name='STEBY VARGHESE',
-                tagline='Aspiring Agentic AI Developer & MCA Candidate'
-            ))
+        else:
+            # Cleanup existing duplicates if any
+            all_projects = Project.query.all()
+            seen_titles = set()
+            for p in all_projects:
+                if p.title in seen_titles:
+                    db.session.delete(p)
+                else:
+                    seen_titles.add(p.title)
             
-            db.session.commit()
+        db.session.commit()
             
     app.run(debug=True)
