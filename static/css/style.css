@@ -832,6 +832,48 @@ section {
     min-height: 100vh;
 }
 
+.admin-mobile-header {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 70px;
+    background: var(--bg-dark);
+    border-bottom: 1px solid var(--glass-border);
+    padding: 0 2rem;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1001;
+    backdrop-filter: blur(15px);
+}
+
+.admin-sidebar-toggle,
+.admin-sidebar-close {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 1.5rem;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+.admin-sidebar-toggle:hover,
+.admin-sidebar-close:hover {
+    color: var(--primary);
+}
+
+.sidebar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 3rem;
+}
+
+.admin-sidebar-close {
+    display: none;
+}
+
 .sidebar {
     width: 280px;
     background: var(--bg-dark);
@@ -845,6 +887,58 @@ section {
     flex: 1;
     margin-left: 280px;
     padding: 3rem;
+    min-width: 0;
+    /* Prevent overflow */
+}
+
+/* Responsive Grid Utilities */
+.admin-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+}
+
+.admin-grid-3-auto {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 1.5rem;
+    align-items: end;
+}
+
+.admin-grid-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+}
+
+.admin-flex-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+@media (max-width: 768px) {
+
+    .admin-grid-2,
+    .admin-grid-3-auto {
+        grid-template-columns: 1fr;
+    }
+
+    .admin-grid-3-auto .btn {
+        width: 100%;
+        margin-top: 1rem;
+    }
+
+    .admin-flex-between {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .login-card {
+        padding: 2rem 1.5rem;
+        width: 90%;
+    }
 }
 
 .admin-nav-item {
@@ -974,11 +1068,42 @@ textarea:focus {
     }
 
     .sidebar {
-        display: none;
+        position: fixed;
+        left: -280px;
+        top: 0;
+        z-index: 2000;
+        transition: 0.4s var(--transition);
+        background: var(--bg-dark);
+        box-shadow: 20px 0 50px rgba(0, 0, 0, 0.5);
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    .admin-sidebar-close {
+        display: block;
+    }
+
+    .admin-mobile-header {
+        display: flex;
     }
 
     .admin-main {
         margin-left: 0;
+        padding: 2rem;
+        padding-top: 100px;
+    }
+
+    .admin-main header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1.5rem;
+    }
+
+    .admin-main header .btn {
+        width: 100%;
+        justify-content: center;
     }
 }
 
