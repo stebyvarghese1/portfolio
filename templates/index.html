@@ -139,6 +139,14 @@
                                 <span class="tag">{{ tech.strip() }}</span>
                                 {% endfor %}
                             </div>
+                            <div class="project-actions">
+                                {% if project.link and project.link != '#' %}
+                                <a href="{{ project.link }}" target="_blank" class="btn btn-secondary">
+                                    <i class="fas fa-external-link-alt"></i>
+                                    <span>View Project</span>
+                                </a>
+                                {% endif %}
+                            </div>
                         </div>
                     </div>
                     {% endfor %}
