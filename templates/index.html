@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Steby Varghese | Professional Portfolio</title>
+    <title>Steby Varghese | Portfolio</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon_icon_1766679969783.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -47,7 +47,7 @@
     </nav>
 
     <div class="container">
-        <section id="home" class="hero">
+        <section id="home" class="hero reveal">
             <div class="hero-content">
                 <p class="tagline">Hello, I'm</p>
                 <h1><span class="text-gradient">STEBY</span> VARGHESE</h1>
@@ -81,8 +81,7 @@
                 <h2>About <span class="text-gradient">Me</span></h2>
             </div>
             <div class="glass-card">
-                <div
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem; align-items: center;">
+                <div class="about-grid">
                     <div>
                         <p style="font-size: 1.2rem; margin-bottom: 1.5rem;">
                             Hello! I'm <span class="text-gradient" style="font-weight: 700;">Steby Varghese</span>, a
@@ -94,17 +93,14 @@
                             tools that solve real-world problems.
                             From computer vision to agentic AI, I'm always looking for the next challenge.
                         </p>
-                        <div style="display: flex; gap: 2rem;">
-                            <div><strong style="font-size: 1.5rem; display: block;"
-                                    class="text-gradient">3+</strong><span
-                                    style="font-size: 0.8rem; color: var(--text-dim);">Years Experience</span></div>
-                            <div><strong style="font-size: 1.5rem; display: block;"
-                                    class="text-gradient">15+</strong><span
-                                    style="font-size: 0.8rem; color: var(--text-dim);">Projects Completed</span></div>
+                        <div class="stats-container">
+                            <div class="stat-item"><strong class="text-gradient">3+</strong><span>Years
+                                    Experience</span></div>
+                            <div class="stat-item"><strong class="text-gradient">15+</strong><span>Projects
+                                    Completed</span></div>
                         </div>
                     </div>
-                    <div class="glass-card"
-                        style="padding: 1rem; display: flex; align-items: center; justify-content: center; overflow: hidden; height: 350px;">
+                    <div class="glass-card about-image-card">
                         {% if profile and profile.about_image_url %}
                         <img src="{{ profile.about_image_url }}" alt="About Steby"
                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; transition: 0.5s var(--transition);"
@@ -120,18 +116,16 @@
 
         <section id="projects" class="reveal">
             <div class="section-head">
-                <h2><span class="text-gradient">Projects</span></h2>
+                <h2>Featured <span class="text-gradient">Projects</span></h2>
             </div>
-            <div class="projects-container">
-                <div class="scroll-hint hint-left"><i class="fas fa-chevron-left"></i></div>
-                <div class="scroll-hint hint-right"><i class="fas fa-chevron-right"></i></div>
-                <div class="projects-grid" id="projects-scroll">
-                    {% for project in projects %}
-                    <div class="glass-card project-card">
-                        <div class="project-img-wrapper">
-                            <img src="{{ project.image_url }}" alt="{{ project.title }}" class="project-img">
+            <div class="projects-stack">
+                {% for project in projects %}
+                <div class="stack-card">
+                    <div class="project-inner">
+                        <div class="project-visual">
+                            <img src="{{ project.image_url }}" alt="{{ project.title }}">
                         </div>
-                        <div class="project-info">
+                        <div class="project-details">
                             <h3>{{ project.title }}</h3>
                             <p>{{ project.description }}</p>
                             <div class="tech-tags">
@@ -139,19 +133,18 @@
                                 <span class="tag">{{ tech.strip() }}</span>
                                 {% endfor %}
                             </div>
-                            <div class="project-actions">
+                            <div class="project-actions" style="margin-top: 2rem;">
                                 {% if project.link and project.link != '#' %}
-                                <a href="{{ project.link }}" target="_blank" class="btn btn-secondary">
+                                <a href="{{ project.link }}" target="_blank" class="btn btn-primary">
+                                    <span>View</span>
                                     <i class="fas fa-external-link-alt"></i>
-                                    <span>View Project</span>
                                 </a>
                                 {% endif %}
                             </div>
                         </div>
                     </div>
-                    {% endfor %}
                 </div>
-                <div class="dots-container"></div>
+                {% endfor %}
             </div>
         </section>
 
@@ -159,20 +152,21 @@
             <div class="section-head">
                 <h2>Technical <span class="text-gradient">Skills</span></h2>
             </div>
-            <div class="skills-container">
-                <div class="scroll-hint hint-left"><i class="fas fa-chevron-left"></i></div>
-                <div class="scroll-hint hint-right"><i class="fas fa-chevron-right"></i></div>
-                <div class="skills-grid" id="skills-scroll">
-                    {% for skill in skills %}
-                    <div class="glass-card skill-card">
-                        <i class="fas fa-code"></i>
-                        <h4>{{ skill.name }}</h4>
-                        <p style="font-size: 0.8rem; color: var(--text-dim); margin-top: 0.5rem;">{{ skill.category }}
-                        </p>
-                    </div>
-                    {% endfor %}
+            <div class="tech-deck">
+                {% for skill in skills %}
+                <div class="tech-tile">
+                    <i class="fas 
+                        {% if 'python' in skill.name.lower() %}fa-code
+                        {% elif 'html' in skill.name.lower() or 'css' in skill.name.lower() %}fa-laptop-code
+                        {% elif 'flask' in skill.name.lower() or 'django' in skill.name.lower() %}fa-server
+                        {% elif 'figma' in skill.name.lower() or 'design' in skill.name.lower() %}fa-pen-nib
+                        {% elif 'ai' in skill.name.lower() or 'ml' in skill.name.lower() %}fa-brain
+                        {% elif 'mobile' in skill.name.lower() or 'kivy' in skill.name.lower() %}fa-mobile-screen
+                        {% elif 'database' in skill.name.lower() or 'sql' in skill.name.lower() %}fa-database
+                        {% else %}fa-microchip{% endif %}"></i>
+                    <h4>{{ skill.name }}</h4>
                 </div>
-                <div class="dots-container"></div>
+                {% endfor %}
             </div>
         </section>
 
@@ -196,7 +190,7 @@
                 <h2>Get In <span class="text-gradient">Touch</span></h2>
             </div>
             <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 3rem;">
+                <div class="contact-grid">
                     <div>
                         <h3 style="margin-bottom: 1.5rem;">Let's talk about your next project</h3>
                         <p style="color: var(--text-dim); margin-bottom: 2rem;">
@@ -287,149 +281,22 @@
         });
 
         // Reveal Animation
-        const observerOptions = { threshold: 0.1 };
+        const observerOptions = {
+            threshold: 0,
+            rootMargin: '0px 0px -10% 0px'
+        };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting) entry.target.classList.add('active');
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                } else {
+                    entry.target.classList.remove('active');
+                }
             });
         }, observerOptions);
 
         document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-        // Horizontal Scroll Logic with Sound
-        const ticTacSound = (() => {
-            const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-            return () => {
-                if (audioCtx.state === 'suspended') audioCtx.resume();
-                const oscillator = audioCtx.createOscillator();
-                const gainNode = audioCtx.createGain();
-                oscillator.type = 'sine';
-                oscillator.frequency.setValueAtTime(400, audioCtx.currentTime);
-                oscillator.frequency.exponentialRampToValueAtTime(10, audioCtx.currentTime + 0.05);
-                gainNode.gain.setValueAtTime(0.04, audioCtx.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.05);
-                oscillator.connect(gainNode);
-                gainNode.connect(audioCtx.destination);
-                oscillator.start();
-                oscillator.stop(audioCtx.currentTime + 0.05);
-            };
-        })();
-
-        function initHorizontalScroll(id) {
-            const el = document.getElementById(id);
-            const container = el.parentElement;
-            const hintLeft = container.querySelector('.hint-left');
-            const hintRight = container.querySelector('.hint-right');
-            const dotsContainer = container.querySelector('.dots-container');
-
-            const updateHints = () => {
-                const maxScroll = el.scrollWidth - el.clientWidth;
-                hintLeft.classList.toggle('visible', el.scrollLeft > 20);
-                hintRight.classList.toggle('visible', el.scrollLeft < maxScroll - 20);
-            };
-
-            el.addEventListener('scroll', updateHints);
-
-            // Generate Dots
-            const cards = el.querySelectorAll('.glass-card');
-            if (dotsContainer) {
-                dotsContainer.innerHTML = '';
-                cards.forEach((card, index) => {
-                    const dot = document.createElement('div');
-                    dot.classList.add('dot');
-                    if (index === 0) dot.classList.add('active');
-                    dot.addEventListener('click', () => {
-                        card.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-                    });
-                    dotsContainer.appendChild(dot);
-                });
-            }
-
-            // Intersection Observer to detect centered element
-            const observerOptions = {
-                root: el,
-                threshold: 0.6,
-            };
-
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        const items = Array.from(el.querySelectorAll('.glass-card'));
-                        const index = items.indexOf(entry.target);
-
-                        items.forEach(item => item.classList.remove('is-centered', 'is-prev', 'is-next'));
-
-                        entry.target.classList.add('is-centered');
-                        if (items[index - 1]) items[index - 1].classList.add('is-prev');
-                        if (items[index + 1]) items[index + 1].classList.add('is-next');
-
-                        // Update Dots
-                        if (dotsContainer) {
-                            const dots = dotsContainer.querySelectorAll('.dot');
-                            dots.forEach(d => d.classList.remove('active'));
-                            if (dots[index]) dots[index].classList.add('active');
-                        }
-
-                        ticTacSound();
-                    }
-                });
-            }, observerOptions);
-
-            el.querySelectorAll('.glass-card').forEach(card => observer.observe(card));
-
-            updateHints();
-            window.addEventListener('resize', updateHints);
-
-            const getScrollAmount = () => {
-                const card = el.querySelector('.glass-card');
-                if (!card) return 300;
-                const style = window.getComputedStyle(el);
-                const gap = parseInt(style.gap) || 0;
-                return card.offsetWidth + gap;
-            };
-
-            hintLeft?.addEventListener('click', () => {
-                el.scrollBy({ left: -getScrollAmount(), behavior: 'smooth' });
-            });
-            hintRight?.addEventListener('click', () => {
-                el.scrollBy({ left: getScrollAmount(), behavior: 'smooth' });
-            });
-
-            let isDown = false;
-            let startX;
-            let scrollLeft;
-
-            el.addEventListener('mousedown', (e) => {
-                isDown = true;
-                el.style.cursor = 'grabbing';
-                el.style.scrollSnapType = 'none';
-                el.style.scrollBehavior = 'auto';
-                startX = e.pageX - el.offsetLeft;
-                scrollLeft = el.scrollLeft;
-            });
-
-            const stopDragging = () => {
-                if (!isDown) return;
-                isDown = false;
-                el.style.cursor = 'grab';
-                el.style.scrollSnapType = 'x mandatory';
-                el.style.scrollBehavior = 'smooth';
-            };
-
-            el.addEventListener('mouseleave', stopDragging);
-            el.addEventListener('mouseup', stopDragging);
-
-            el.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-                e.preventDefault();
-                const x = e.pageX - el.offsetLeft;
-                const walk = (x - startX) * 1.5;
-                el.scrollLeft = scrollLeft - walk;
-            });
-        }
-
-        initHorizontalScroll('projects-scroll');
-        initHorizontalScroll('skills-scroll');
 
         // Contact Form Handler
         const contactForm = document.getElementById('contact-form');
@@ -469,6 +336,33 @@
                     submitBtn.disabled = false;
                 }, 3000);
             }
+        });
+        // Tech Tags Horizontal Scroll (Grab to Scroll)
+        const sliders = document.querySelectorAll('.tech-tags');
+        sliders.forEach(slider => {
+            let isDown = false;
+            let startX;
+            let scrollLeft;
+
+            slider.addEventListener('mousedown', (e) => {
+                isDown = true;
+                slider.classList.add('active');
+                startX = e.pageX - slider.offsetLeft;
+                scrollLeft = slider.scrollLeft;
+            });
+            slider.addEventListener('mouseleave', () => {
+                isDown = false;
+            });
+            slider.addEventListener('mouseup', () => {
+                isDown = false;
+            });
+            slider.addEventListener('mousemove', (e) => {
+                if (!isDown) return;
+                e.preventDefault();
+                const x = e.pageX - slider.offsetLeft;
+                const walk = (x - startX) * 2;
+                slider.scrollLeft = scrollLeft - walk;
+            });
         });
     </script>
 </body>
