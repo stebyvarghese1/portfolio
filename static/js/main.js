@@ -80,9 +80,21 @@ const clock = new THREE.Clock();
 const animate = () => {
     const elapsedTime = clock.getElapsedTime();
 
-    // Rotate Torus Knot
-    torusKnot.rotation.y = elapsedTime * 0.2;
+    // Scroll-based parallax and scaling
+    const scrollY = window.scrollY;
+    const targetScale = 1 + scrollY * 0.0012;
+    const currentScale = torusKnot.scale.x;
+    const newScale = currentScale + (targetScale - currentScale) * 0.08;
+
+    torusKnot.scale.set(newScale, newScale, newScale);
+    particles.scale.set(newScale * 0.5 + 0.5, newScale * 0.5 + 0.5, newScale * 0.5 + 0.5);
+
+    // Rotation: Base (time) + Offset (scroll)
+    torusKnot.rotation.y = elapsedTime * 0.2 + scrollY * 0.0005;
     torusKnot.rotation.z = elapsedTime * 0.1;
+
+    particles.rotation.y = elapsedTime * 0.05 + scrollY * 0.0002;
+    particles.rotation.x = elapsedTime * 0.02;
 
     // Smooth interaction with mouse
     const targetX = mouseX * 2;
@@ -90,10 +102,6 @@ const animate = () => {
 
     torusKnot.position.x += (targetX - torusKnot.position.x) * 0.05;
     torusKnot.position.y += (targetY - torusKnot.position.y) * 0.05;
-
-    // Nebula rotation
-    particles.rotation.y = elapsedTime * 0.05;
-    particles.rotation.x = elapsedTime * 0.02;
 
     // Render
     renderer.render(scene, camera);
