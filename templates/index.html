@@ -3,7 +3,7 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <title>Steby Varghese | Portfolio</title>
     <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/favicon_icon_1766679969783.png') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
@@ -114,14 +114,14 @@
             </div>
         </section>
 
-        <section id="projects" class="reveal">
-            <div class="section-head">
+        <section id="projects">
+            <div class="section-head reveal">
                 <h2>Featured <span class="text-gradient">Projects</span></h2>
             </div>
             <div class="projects-stack">
                 {% for project in projects %}
                 <div class="stack-card">
-                    <div class="project-inner">
+                    <div class="project-inner reveal">
                         <div class="project-visual">
                             <img src="{{ project.image_url }}" alt="{{ project.title }}">
                         </div>
@@ -363,6 +363,12 @@
                 const walk = (x - startX) * 2;
                 slider.scrollLeft = scrollLeft - walk;
             });
+        });
+
+        // Final Fix: Force browser to calculate sticky/reveal states on load
+        window.addEventListener('load', () => {
+            window.scrollTo(window.scrollX, window.scrollY + 1);
+            window.scrollTo(window.scrollX, window.scrollY - 1);
         });
     </script>
 </body>
