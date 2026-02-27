@@ -120,7 +120,7 @@
             </div>
             <div class="projects-stack">
                 {% for project in projects %}
-                <div class="stack-card">
+                <div class="stack-card" style="--card-index: {{ loop.index0 }};">
                     <div class="project-inner reveal">
                         <div class="project-visual">
                             <img src="{{ project.image_url }}" alt="{{ project.title }}">
@@ -133,10 +133,24 @@
                                 <span class="tag">{{ tech.strip() }}</span>
                                 {% endfor %}
                             </div>
-                            <div class="project-actions" style="margin-top: 2rem;">
-                                {% if project.link and project.link != '#' %}
-                                <a href="{{ project.link }}" target="_blank" class="btn btn-primary">
-                                    <span>View</span>
+                            <div class="project-actions"
+                                style="margin-top: auto; display: flex; gap: 1rem; flex-wrap: wrap;">
+                                {% if project.link %}
+                                <a href="{{ project.link }}" target="_blank" class="btn btn-primary" {% if
+                                    project.link=='#' %}style="pointer-events: none; opacity: 0.7;" {% endif %}>
+                                    {% if project.link == '#' %}
+                                    <span>No Source</span>
+                                    <i class="fas fa-lock"></i>
+                                    {% else %}
+                                    <span>Source Code</span>
+                                    <i class="fab fa-github"></i>
+                                    {% endif %}
+                                </a>
+                                {% endif %}
+                                {% if project.preview_link %}
+                                <a href="{{ project.preview_link }}" target="_blank" class="btn btn-secondary"
+                                    style="border-width: 1px;">
+                                    <span>Live Preview</span>
                                     <i class="fas fa-external-link-alt"></i>
                                 </a>
                                 {% endif %}
@@ -337,33 +351,7 @@
                 }, 3000);
             }
         });
-        // Tech Tags Horizontal Scroll (Grab to Scroll)
-        const sliders = document.querySelectorAll('.tech-tags');
-        sliders.forEach(slider => {
-            let isDown = false;
-            let startX;
-            let scrollLeft;
 
-            slider.addEventListener('mousedown', (e) => {
-                isDown = true;
-                slider.classList.add('active');
-                startX = e.pageX - slider.offsetLeft;
-                scrollLeft = slider.scrollLeft;
-            });
-            slider.addEventListener('mouseleave', () => {
-                isDown = false;
-            });
-            slider.addEventListener('mouseup', () => {
-                isDown = false;
-            });
-            slider.addEventListener('mousemove', (e) => {
-                if (!isDown) return;
-                e.preventDefault();
-                const x = e.pageX - slider.offsetLeft;
-                const walk = (x - startX) * 2;
-                slider.scrollLeft = scrollLeft - walk;
-            });
-        });
 
         // Final Fix: Force browser to calculate sticky/reveal states on load
         window.addEventListener('load', () => {
