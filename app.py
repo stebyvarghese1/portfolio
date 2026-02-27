@@ -47,9 +47,11 @@ class Project(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(200), nullable=False)
     description = db.Column(db.Text, nullable=False)
-    technologies = db.Column(db.String(500))
-    image_url = db.Column(db.String(500))
-    link = db.Column(db.String(500))
+    technologies = db.Column(db.Text)
+    image_url = db.Column(db.Text)
+    link = db.Column(db.Text)
+    preview_link = db.Column(db.Text)
+    order = db.Column(db.Integer, default=0)
 
 class Skill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -64,15 +66,15 @@ class Education(db.Model):
 
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    photo_url = db.Column(db.String(500))
-    about_image_url = db.Column(db.String(500))
+    photo_url = db.Column(db.Text)
+    about_image_url = db.Column(db.Text)
     name = db.Column(db.String(100))
-    tagline = db.Column(db.String(200))
+    tagline = db.Column(db.String(500))
 
 # Routes
 @app.route('/')
 def index():
-    projects = Project.query.all()
+    projects = Project.query.order_by(Project.order.asc()).all()
     skills = Skill.query.all()
     education = Education.query.all()
     profile = Profile.query.first()
@@ -94,7 +96,7 @@ def login():
 def admin():
     if 'user_id' not in session:
         return redirect(url_for('login'))
-    projects = Project.query.all()
+    projects = Project.query.order_by(Project.order.asc()).all()
     skills = Skill.query.all()
     education = Education.query.all()
     profile = Profile.query.first()
@@ -119,12 +121,18 @@ def update_profile():
 @app.route('/admin/project/add', methods=['POST'])
 def add_project():
     if 'user_id' not in session: return redirect(url_for('login'))
+    
+    max_order = db.session.query(db.func.max(Project.order)).scalar()
+    next_order = (max_order or 0) + 1
+    
     new_project = Project(
         title=request.form.get('title'),
         description=request.form.get('description'),
         technologies=request.form.get('technologies'),
         image_url=request.form.get('image_url'),
-        link=request.form.get('link')
+        link=request.form.get('link'),
+        preview_link=request.form.get('preview_link'),
+        order=next_order
     )
     db.session.add(new_project)
     db.session.commit()
@@ -137,6 +145,38 @@ def delete_project(id):
     if project:
         db.session.delete(project)
         db.session.commit()
+    return redirect(url_for('admin'))
+
+@app.route('/admin/project/edit/<int:id>', methods=['POST'])
+def edit_project(id):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    project = Project.query.get(id)
+    if project:
+        project.title = request.form.get('title')
+        project.description = request.form.get('description')
+        project.technologies = request.form.get('technologies')
+        project.image_url = request.form.get('image_url')
+        project.link = request.form.get('link')
+        project.preview_link = request.form.get('preview_link')
+        db.session.commit()
+    return redirect(url_for('admin'))
+
+@app.route('/admin/project/move/<int:id>/<direction>')
+def move_project(id, direction):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    project = Project.query.get(id)
+    if not project: return redirect(url_for('admin'))
+    
+    # Simple swap logic
+    if direction == 'up':
+        other = Project.query.filter(Project.order < project.order).order_by(Project.order.desc()).first()
+    else:
+        other = Project.query.filter(Project.order > project.order).order_by(Project.order.asc()).first()
+        
+    if other:
+        project.order, other.order = other.order, project.order
+        db.session.commit()
+        
     return redirect(url_for('admin'))
 
 @app.route('/admin/skill/add', methods=['POST'])
@@ -218,14 +258,39 @@ if __name__ == '__main__':
             db.session.execute(db.text('ALTER TABLE "user" ALTER COLUMN password TYPE VARCHAR(500)'))
             # Increase project field lengths
             db.session.execute(db.text('ALTER TABLE project ALTER COLUMN title TYPE VARCHAR(200)'))
-            db.session.execute(db.text('ALTER TABLE project ALTER COLUMN technologies TYPE VARCHAR(500)'))
-            db.session.execute(db.text('ALTER TABLE project ALTER COLUMN image_url TYPE VARCHAR(500)'))
-            db.session.execute(db.text('ALTER TABLE project ALTER COLUMN link TYPE VARCHAR(500)'))
+            db.session.execute(db.text('ALTER TABLE project ALTER COLUMN technologies TYPE TEXT'))
+            db.session.execute(db.text('ALTER TABLE project ALTER COLUMN image_url TYPE TEXT'))
+            db.session.execute(db.text('ALTER TABLE project ALTER COLUMN link TYPE TEXT'))
             
-            db.session.execute(db.text('ALTER TABLE profile ADD COLUMN IF NOT EXISTS about_image_url VARCHAR(500)'))
+            # Update profile field lengths
+            db.session.execute(db.text('ALTER TABLE profile ALTER COLUMN photo_url TYPE TEXT'))
+            db.session.execute(db.text('ALTER TABLE profile ALTER COLUMN about_image_url TYPE TEXT'))
+            
+            db.session.execute(db.text('ALTER TABLE profile ALTER COLUMN tagline TYPE VARCHAR(500)'))
+            
+            db.session.execute(db.text('ALTER TABLE profile ADD COLUMN IF NOT EXISTS about_image_url TEXT'))
             db.session.commit()
         except Exception as e:
             print(f"Migration notice: {e}")
+            db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE project ADD COLUMN preview_link TEXT'))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
+        try:
+            # Need quotes around order because it's a SQL keyword
+            db.session.execute(db.text('ALTER TABLE project ADD COLUMN "order" INTEGER DEFAULT 0'))
+            db.session.commit()
+            
+            # Reorder existing if they have order 0
+            existing_projects = Project.query.all()
+            for idx, p in enumerate(existing_projects):
+                p.order = idx + 1
+            db.session.commit()
+        except Exception as e:
             db.session.rollback()
             
         # Ensure at least one Profile record exists
