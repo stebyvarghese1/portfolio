@@ -494,7 +494,7 @@ section {
 #projects .section-head {
     position: sticky;
     top: 80px;
-    z-index: 50;
+    z-index: 0;
     pointer-events: none;
     margin-bottom: 0;
     padding-bottom: 3rem;
@@ -505,7 +505,7 @@ section {
     #projects .section-head {
         position: sticky;
         top: 70px;
-        z-index: 100;
+        z-index: 0;
         padding-bottom: 2rem;
         background: transparent;
         pointer-events: none;
@@ -530,22 +530,22 @@ section {
 
 .stack-card {
     position: sticky;
-    top: 180px;
+    top: calc(150px + (var(--card-index, 0) * 25px));
     width: 100%;
-    height: auto;
-    min-height: 450px;
+    height: 520px;
     display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 1;
-    transition: top 0.3s;
+    z-index: 10;
+    transition: top 0.3s, transform 0.3s;
 }
 
 @media (max-width: 768px) {
     .stack-card {
         position: sticky;
         top: 130px;
-        min-height: auto;
+        height: 600px;
+        min-height: 600px;
         margin-bottom: 2rem;
     }
 }
@@ -558,7 +558,8 @@ section {
 
     .stack-card {
         top: 120px;
-        min-height: auto;
+        height: 600px;
+        min-height: 600px;
     }
 }
 
@@ -567,11 +568,12 @@ section {
     grid-template-columns: 1.2fr 1fr;
     gap: 3rem;
     width: 100%;
+    height: 100%;
     padding: 3rem;
-    background: rgba(10, 10, 32, 0.7);
+    background: rgba(10, 10, 32, 0.98);
     border: 1px solid var(--glass-border);
     backdrop-filter: blur(25px);
-    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 20px 80px rgba(0, 0, 0, 0.6);
     border-radius: 40px;
     transition: transform 0.5s var(--transition);
 }
@@ -620,28 +622,29 @@ section {
 }
 
 .project-details h3 {
-    font-size: 2.2rem;
-    margin-bottom: 1rem;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
     color: var(--primary);
 }
 
 .project-details p {
-    font-size: 1.1rem;
-    line-height: 1.7;
+    font-size: 1.05rem;
+    line-height: 1.6;
     color: var(--text-dim);
-    margin-bottom: 2rem;
+    margin-bottom: 1.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
 .tech-tags {
     display: flex;
-    flex-wrap: nowrap;
-    overflow-x: auto;
+    flex-wrap: wrap;
     gap: 0.6rem;
     padding: 0.5rem 0;
     margin-bottom: 1rem;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    -webkit-overflow-scrolling: touch;
     width: 100%;
 }
 
@@ -650,16 +653,6 @@ section {
         justify-content: center;
         margin-bottom: 1.5rem;
     }
-}
-
-.tech-tags:active {
-    cursor: grabbing;
-}
-
-
-.tech-tags::-webkit-scrollbar {
-    display: none;
-    /* Chrome, Safari, and Opera */
 }
 
 .tag {
