@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.skypack.dev/three@0.136.0';
+import * as THREE from 'https://unpkg.com/three@0.136.0/build/three.module.js';
 
 /**
  * Professional 3D Portfolio Scene
