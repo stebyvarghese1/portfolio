@@ -1026,6 +1026,22 @@ section {
     cursor: grabbing;
 }
 
+/* The mask creates the inward-curved cylinder profile (concave circle) on the right side */
+.skills-wheel-mask {
+    content: '';
+    position: absolute;
+    top: -10%;
+    right: -130px;
+    width: 260px;
+    height: 120%;
+    background: transparent; /* Fully transparent so background gradients show through */
+    border-radius: 50%;
+    border-left: 2px solid var(--primary); /* Neon primary curved boundary line */
+    box-shadow: -15px 0 35px rgba(0, 242, 254, 0.15); /* Soft outer glow */
+    z-index: 15;
+    pointer-events: none;
+}
+
 .skills-wheel {
     position: relative;
     width: 80%;
@@ -1087,6 +1103,10 @@ section {
         border-radius: 28px;
     }
 
+    .skills-wheel-mask {
+        right: -100px;
+        width: 200px;
+    }
 
     .skills-wheel-item {
         height: 65px;
