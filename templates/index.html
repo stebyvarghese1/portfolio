@@ -11,8 +11,13 @@
 </head>
 
 <body>
-    <canvas id="stars-canvas"></canvas>
-    <div class="gradient-bg"></div>
+    <div class="gradient-bg">
+        <div class="stars-3d-container">
+            <div class="stars-layer stars-layer-1"></div>
+            <div class="stars-layer stars-layer-2"></div>
+            <div class="stars-layer stars-layer-3"></div>
+        </div>
+    </div>
 
     <nav id="navbar">
         <div class="logo" onclick="window.scrollTo(0,0)"><span class="text-gradient">STEBY </span> VARGHESE</div>
@@ -133,8 +138,7 @@
                                 <span class="tag">{{ tech.strip() }}</span>
                                 {% endfor %}
                             </div>
-                            <div class="project-actions"
-                                style="margin-top: auto; display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <div class="project-actions">
                                 {% if project.link %}
                                 <a href="{{ project.link }}" target="_blank" class="btn btn-primary" {% if
                                     project.link=='#' %}style="pointer-events: none; opacity: 0.7;" {% endif %}>
@@ -249,7 +253,6 @@
         </footer>
     </div>
 
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
     <script>
         // Scroll Navbar Effect
         window.addEventListener('scroll', () => {
