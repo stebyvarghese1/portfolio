@@ -170,21 +170,26 @@
             <div class="section-head">
                 <h2>Technical <span class="text-gradient">Skills</span></h2>
             </div>
-            <div class="tech-deck">
-                {% for skill in skills %}
-                <div class="tech-tile">
-                    <i class="fas 
-                        {% if 'python' in skill.name.lower() %}fa-code
-                        {% elif 'html' in skill.name.lower() or 'css' in skill.name.lower() %}fa-laptop-code
-                        {% elif 'flask' in skill.name.lower() or 'django' in skill.name.lower() %}fa-server
-                        {% elif 'figma' in skill.name.lower() or 'design' in skill.name.lower() %}fa-pen-nib
-                        {% elif 'ai' in skill.name.lower() or 'ml' in skill.name.lower() %}fa-brain
-                        {% elif 'mobile' in skill.name.lower() or 'kivy' in skill.name.lower() %}fa-mobile-screen
-                        {% elif 'database' in skill.name.lower() or 'sql' in skill.name.lower() %}fa-database
-                        {% else %}fa-microchip{% endif %}"></i>
-                    <h4>{{ skill.name }}</h4>
+            <div class="skills-graph-container">
+                <canvas id="skills-graph-canvas"></canvas>
+                <div class="skills-nodes-cloud" id="skills-nodes-cloud">
+                    {% for skill in skills %}
+                    <div class="skill-node">
+                        <div class="skill-node-inner">
+                            <i class="fas 
+                                {% if 'python' in skill.name.lower() %}fa-code
+                                {% elif 'html' in skill.name.lower() or 'css' in skill.name.lower() %}fa-laptop-code
+                                {% elif 'flask' in skill.name.lower() or 'django' in skill.name.lower() %}fa-server
+                                {% elif 'figma' in skill.name.lower() or 'design' in skill.name.lower() %}fa-pen-nib
+                                {% elif 'ai' in skill.name.lower() or 'ml' in skill.name.lower() %}fa-brain
+                                {% elif 'mobile' in skill.name.lower() or 'kivy' in skill.name.lower() %}fa-mobile-screen
+                                {% elif 'database' in skill.name.lower() or 'sql' in skill.name.lower() %}fa-database
+                                {% else %}fa-microchip{% endif %}"></i>
+                            <span class="skill-name">{{ skill.name }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
                 </div>
-                {% endfor %}
             </div>
         </section>
 
@@ -356,6 +361,244 @@
                 }, 3000);
             }
         });
+
+
+        // Skills Graph / Connected Nodes Apple Watch Bubble Cloud
+        (function() {
+            const container = document.getElementById('skills-nodes-cloud');
+            const canvas = document.getElementById('skills-graph-canvas');
+            const ctx = canvas.getContext('2d');
+            const parent = container.parentElement;
+
+            let nodes = Array.from(document.querySelectorAll('.skill-node'));
+            let nodeData = [];
+
+            // Spacing parameter D
+            let D = window.innerWidth <= 768 ? 95 : 135;
+            
+            // Pan translation offsets
+            let panX = 0;
+            let panY = 0;
+            let targetPanX = 0;
+            let targetPanY = 0;
+            
+            // Drag state tracking
+            let isDragging = false;
+            let startX, startY;
+
+            // Generate Apple Watch concentric honeycomb grid positions
+            function layoutNodes() {
+                nodes.forEach((node, i) => {
+                    let x = 0;
+                    let y = 0;
+                    if (i === 0) {
+                        // Center
+                        x = 0; y = 0;
+                    } else if (i <= 6) {
+                        // Ring 1
+                        let angle = (i - 1) * (2 * Math.PI / 6);
+                        x = D * Math.cos(angle);
+                        y = D * Math.sin(angle);
+                    } else if (i <= 18) {
+                        // Ring 2
+                        let angle = (i - 7) * (2 * Math.PI / 12) + (Math.PI / 12);
+                        x = 1.8 * D * Math.cos(angle);
+                        y = 1.8 * D * Math.sin(angle);
+                    } else {
+                        // Ring 3
+                        let angle = (i - 19) * (2 * Math.PI / 18);
+                        x = 2.6 * D * Math.cos(angle);
+                        y = 2.6 * D * Math.sin(angle);
+                    }
+
+                    nodeData[i] = {
+                        el: node,
+                        baseX: x,
+                        baseY: y,
+                        x: x,
+                        y: y,
+                        scale: nodeData[i] ? nodeData[i].scale : 1,
+                        targetScale: nodeData[i] ? nodeData[i].targetScale : 1,
+                        isHovered: nodeData[i] ? nodeData[i].isHovered : false
+                    };
+                });
+            }
+
+            // Set canvas bounds
+            function resizeCanvas() {
+                const rect = parent.getBoundingClientRect();
+                canvas.width = rect.width;
+                canvas.height = rect.height;
+                // Recompute spacing
+                D = window.innerWidth <= 768 ? 95 : 135;
+                layoutNodes();
+                draw();
+            }
+
+            // Draw line connections and glows
+            function draw() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                const centerX = canvas.width / 2 + panX;
+                const centerY = canvas.height / 2 + panY;
+
+                // Find active/hovered node
+                let activeNodeIndex = nodeData.findIndex(n => n.isHovered);
+
+                // Draw background connections (only between nodes that are close to each other)
+                ctx.lineWidth = 1.5;
+                
+                for (let i = 0; i < nodeData.length; i++) {
+                    const nodeA = nodeData[i];
+                    const xA = centerX + nodeA.baseX;
+                    const yA = centerY + nodeA.baseY;
+
+                    for (let j = i + 1; j < nodeData.length; j++) {
+                        const nodeB = nodeData[j];
+                        const dx = nodeA.baseX - nodeB.baseX;
+                        const dy = nodeA.baseY - nodeB.baseY;
+                        const dist = Math.sqrt(dx*dx + dy*dy);
+
+                        // If nodes are neighbors, draw line
+                        // Threshold depends on spacing D (max distance: Ring neighbor spacing ~1.5 * D)
+                        if (dist < D * 1.6) {
+                            const xB = centerX + nodeB.baseX;
+                            const yB = centerY + nodeB.baseY;
+
+                            // Draw glowing connections
+                            const isLineActive = (activeNodeIndex === i || activeNodeIndex === j);
+                            
+                            ctx.beginPath();
+                            ctx.moveTo(xA, yA);
+                            ctx.lineTo(xB, yB);
+                            
+                            if (isLineActive) {
+                                ctx.strokeStyle = 'rgba(0, 242, 254, 0.6)';
+                                ctx.shadowBlur = 10;
+                                ctx.shadowColor = '#00f2fe';
+                            } else {
+                                ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+                                ctx.shadowBlur = 0;
+                            }
+                            ctx.stroke();
+                        }
+                    }
+                }
+
+                // Reset shadow mapping
+                ctx.shadowBlur = 0;
+
+                // Update element positions and scales in DOM
+                nodeData.forEach((node, i) => {
+                    // Apple Watch app launcher effect:
+                    // Nodes closer to the visual center of the CONTAINER are scaled larger (up to 1.15)
+                    // Nodes closer to the edges of the CONTAINER scale down (down to 0.7)
+                    const xInContainer = centerX + node.baseX;
+                    const yInContainer = centerY + node.baseY;
+                    
+                    const dxFromCenter = xInContainer - canvas.width / 2;
+                    const dyFromCenter = yInContainer - canvas.height / 2;
+                    const distFromCenter = Math.sqrt(dxFromCenter * dxFromCenter + dyFromCenter * dyFromCenter);
+                    
+                    // Center of container has max scale, fading out to edges
+                    const maxDist = Math.max(canvas.width, canvas.height) / 2;
+                    let watchScale = 1 - (distFromCenter / maxDist) * 0.45;
+                    watchScale = Math.max(0.65, Math.min(1.15, watchScale));
+
+                    // Interpolate hover scale
+                    node.scale += (node.targetScale - node.scale) * 0.15;
+                    
+                    // Final transform combined: positioning + current scale
+                    const finalScale = node.scale * watchScale;
+                    node.el.style.transform = `translate(calc(-50% + ${panX + node.baseX}px), calc(-50% + ${panY + node.baseY}px)) scale(${finalScale})`;
+                });
+            }
+
+            // Animation Loop
+            function tick() {
+                // Smooth pan lerping
+                panX += (targetPanX - panX) * 0.1;
+                panY += (targetPanY - panY) * 0.1;
+
+                draw();
+                requestAnimationFrame(tick);
+            }
+
+            // Mouse / Touch drag handlers (Panning)
+            function startDrag(e) {
+                isDragging = true;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                startX = clientX - targetPanX;
+                startY = clientY - targetPanY;
+                parent.style.cursor = 'grabbing';
+            }
+
+            function drag(e) {
+                if (!isDragging) return;
+                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+                
+                let newPanX = clientX - startX;
+                let newPanY = clientY - startY;
+
+                // Restrict boundary so cloud doesn't drag too far off center
+                const maxPan = window.innerWidth <= 768 ? 120 : 200;
+                targetPanX = Math.max(-maxPan, Math.min(maxPan, newPanX));
+                targetPanY = Math.max(-maxPan, Math.min(maxPan, newPanY));
+            }
+
+            function stopDrag() {
+                isDragging = false;
+                parent.style.cursor = 'grab';
+            }
+
+            // Hover effects
+            nodes.forEach((el, index) => {
+                el.addEventListener('mouseenter', () => {
+                    if (nodeData[index]) {
+                        nodeData[index].targetScale = 1.3;
+                        nodeData[index].isHovered = true;
+                        
+                        // Scale adjacent neighbors
+                        nodeData.forEach((other, oi) => {
+                            if (oi !== index) {
+                                const dx = nodeData[index].baseX - other.baseX;
+                                const dy = nodeData[index].baseY - other.baseY;
+                                const dist = Math.sqrt(dx*dx + dy*dy);
+                                if (dist < D * 1.6) {
+                                    other.targetScale = 1.1;
+                                }
+                            }
+                        });
+                    }
+                });
+
+                el.addEventListener('mouseleave', () => {
+                    nodeData.forEach((node) => {
+                        node.targetScale = 1.0;
+                        node.isHovered = false;
+                    });
+                });
+            });
+
+            // Listeners
+            parent.addEventListener('mousedown', startDrag);
+            window.addEventListener('mousemove', drag);
+            window.addEventListener('mouseup', stopDrag);
+
+            parent.addEventListener('touchstart', startDrag, { passive: true });
+            window.addEventListener('touchmove', drag, { passive: true });
+            window.addEventListener('touchend', stopDrag);
+
+            window.addEventListener('resize', resizeCanvas);
+            
+            // Initialize
+            setTimeout(() => {
+                resizeCanvas();
+                tick();
+            }, 100);
+        })();
 
 
         // Final Fix: Force browser to calculate sticky/reveal states on load
