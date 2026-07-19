@@ -635,6 +635,10 @@ section {
     z-index: calc(10 + var(--card-index, 0));
     /* Ensure later cards are visually above */
     transition: top 0.3s, transform 0.3s;
+
+    /* Hardware acceleration to prevent scroll glitches */
+    transform: translate3d(0, 0, 0);
+    will-change: transform;
 }
 
 .stack-card:hover .project-inner {
@@ -654,11 +658,16 @@ section {
     background: #0a0a20;
     /* Solid background to fully hide previous cards */
     border: 1px solid var(--glass-border);
-    backdrop-filter: blur(25px);
     box-shadow: 0 20px 80px rgba(0, 0, 0, 0.8);
     /* Stronger shadow for depth */
     border-radius: 40px;
     transition: transform 0.5s var(--transition);
+
+    /* Hardware acceleration and layer caching to prevent glassmorphic scroll glitches */
+    transform: translate3d(0, 0, 0);
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    will-change: transform;
 }
 
 .project-visual {
