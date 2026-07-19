@@ -601,7 +601,7 @@ section {
 @media (max-width: 768px) {
     #projects .section-head {
         position: sticky;
-        top: 110px;
+        top: 140px;
         z-index: 100;
         padding-bottom: 2rem;
         background: transparent;
@@ -797,12 +797,12 @@ section {
 @media (max-width: 768px) {
     .projects-stack {
         gap: 45vh;
-        margin-top: 22vh;
+        margin-top: 28vh;
         margin-bottom: -520px; /* Matches card height */
     }
 
     .stack-card {
-        top: 180px;
+        top: 210px;
         height: 520px;
     }
 
@@ -879,17 +879,17 @@ section {
 /* Small Screen Media Queries (max-width: 480px) */
 @media (max-width: 480px) {
     #projects .section-head {
-        top: 100px;
+        top: 130px;
     }
 
     .projects-stack {
         gap: 40vh;
-        margin-top: 20vh;
+        margin-top: 26vh;
         margin-bottom: -480px; /* Matches card height */
     }
 
     .stack-card {
-        top: 160px;
+        top: 190px;
         height: 480px;
     }
 
