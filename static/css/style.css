@@ -1005,15 +1005,13 @@ section {
     max-width: 480px;
     height: 400px;
     margin: 3rem auto 0 auto;
-    background: rgba(5, 5, 16, 0.4);
-    border: 1px solid var(--glass-border);
-    border-radius: 40px;
+    background: transparent; /* Seamless floating container */
+    border: none;
     overflow: hidden;
     perspective: 1200px;
     display: flex;
     justify-content: center;
     align-items: center;
-    backdrop-filter: var(--glass-blur);
     cursor: grab;
     user-select: none;
     -webkit-user-select: none;
@@ -1082,10 +1080,9 @@ section {
     display: flex;
     align-items: center;
     justify-content: center;
-    border-top: 1px solid rgba(0, 242, 254, 0.12);
-    border-bottom: 1px solid rgba(0, 242, 254, 0.12);
-    background: rgba(10, 10, 32, 0.45);
-    box-shadow: inset 0 0 20px rgba(0, 242, 254, 0.01);
+    border-top: 1px solid rgba(255, 255, 255, 0.05); /* Subtle dividers */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    background: transparent; /* Floating look */
 }
 
 .skills-wheel-item-content {
