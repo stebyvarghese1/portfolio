@@ -170,12 +170,12 @@
             <div class="section-head">
                 <h2>Technical <span class="text-gradient">Skills</span></h2>
             </div>
-            <div class="skills-graph-container">
-                <canvas id="skills-graph-canvas"></canvas>
-                <div class="skills-nodes-cloud" id="skills-nodes-cloud">
+            <div class="skills-wheel-container">
+                <div class="skills-wheel-mask"></div>
+                <div class="skills-wheel" id="skills-wheel">
                     {% for skill in skills %}
-                    <div class="skill-node">
-                        <div class="skill-node-inner">
+                    <div class="skills-wheel-item">
+                        <div class="skills-wheel-item-content">
                             <i class="fas 
                                 {% if 'python' in skill.name.lower() %}fa-code
                                 {% elif 'html' in skill.name.lower() or 'css' in skill.name.lower() %}fa-laptop-code
@@ -185,7 +185,7 @@
                                 {% elif 'mobile' in skill.name.lower() or 'kivy' in skill.name.lower() %}fa-mobile-screen
                                 {% elif 'database' in skill.name.lower() or 'sql' in skill.name.lower() %}fa-database
                                 {% else %}fa-microchip{% endif %}"></i>
-                            <span class="skill-name">{{ skill.name }}</span>
+                            <h3>{{ skill.name }}</h3>
                         </div>
                     </div>
                     {% endfor %}
@@ -363,241 +363,121 @@
         });
 
 
-        // Skills Graph / Connected Nodes Apple Watch Bubble Cloud
+        // 3D Skills Wheel / Cylinder Auto-Scroll
         (function() {
-            const container = document.getElementById('skills-nodes-cloud');
-            const canvas = document.getElementById('skills-graph-canvas');
-            const ctx = canvas.getContext('2d');
-            const parent = container.parentElement;
+            const wheel = document.getElementById('skills-wheel');
+            let items = Array.from(wheel.querySelectorAll('.skills-wheel-item'));
+            if (items.length === 0) return;
 
-            let nodes = Array.from(document.querySelectorAll('.skill-node'));
-            let nodeData = [];
+            // To make a smooth cylinder, we want at least 12 items
+            const minItems = 12;
+            while (items.length < minItems) {
+                items.forEach(item => {
+                    const clone = item.cloneNode(true);
+                    wheel.appendChild(clone);
+                });
+                items = Array.from(wheel.querySelectorAll('.skills-wheel-item'));
+            }
 
-            // Spacing parameter D
-            let D = window.innerWidth <= 768 ? 95 : 135;
-            
-            // Pan translation offsets
-            let panX = 0;
-            let panY = 0;
-            let targetPanX = 0;
-            let targetPanY = 0;
-            
-            // Drag state tracking
+            const N = items.length;
+            const angleBetween = 360 / N;
+            // Calculate cylinder radius dynamically
+            let itemHeight = items[0].offsetHeight || 80;
+            let R = (itemHeight / 2) / Math.tan(Math.PI / N);
+
+            function positionItems() {
+                itemHeight = items[0].offsetHeight || 80;
+                R = (itemHeight / 2) / Math.tan(Math.PI / N);
+                items.forEach((item, i) => {
+                    const angle = i * angleBetween;
+                    item.style.transform = `rotateX(${angle}deg) translateZ(${R}px)`;
+                });
+            }
+
+            positionItems();
+            window.addEventListener('resize', positionItems);
+
+            let currentAngle = 0;
+            let targetAngle = 0;
             let isDragging = false;
-            let startX, startY;
-
-            // Generate Apple Watch concentric honeycomb grid positions
-            function layoutNodes() {
-                nodes.forEach((node, i) => {
-                    let x = 0;
-                    let y = 0;
-                    if (i === 0) {
-                        // Center
-                        x = 0; y = 0;
-                    } else if (i <= 6) {
-                        // Ring 1
-                        let angle = (i - 1) * (2 * Math.PI / 6);
-                        x = D * Math.cos(angle);
-                        y = D * Math.sin(angle);
-                    } else if (i <= 18) {
-                        // Ring 2
-                        let angle = (i - 7) * (2 * Math.PI / 12) + (Math.PI / 12);
-                        x = 1.8 * D * Math.cos(angle);
-                        y = 1.8 * D * Math.sin(angle);
-                    } else {
-                        // Ring 3
-                        let angle = (i - 19) * (2 * Math.PI / 18);
-                        x = 2.6 * D * Math.cos(angle);
-                        y = 2.6 * D * Math.sin(angle);
-                    }
-
-                    nodeData[i] = {
-                        el: node,
-                        baseX: x,
-                        baseY: y,
-                        x: x,
-                        y: y,
-                        scale: nodeData[i] ? nodeData[i].scale : 1,
-                        targetScale: nodeData[i] ? nodeData[i].targetScale : 1,
-                        isHovered: nodeData[i] ? nodeData[i].isHovered : false
-                    };
-                });
-            }
-
-            // Set canvas bounds
-            function resizeCanvas() {
-                const rect = parent.getBoundingClientRect();
-                canvas.width = rect.width;
-                canvas.height = rect.height;
-                // Recompute spacing
-                D = window.innerWidth <= 768 ? 95 : 135;
-                layoutNodes();
-                draw();
-            }
-
-            // Draw line connections and glows
-            function draw() {
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                
-                const centerX = canvas.width / 2 + panX;
-                const centerY = canvas.height / 2 + panY;
-
-                // Find active/hovered node
-                let activeNodeIndex = nodeData.findIndex(n => n.isHovered);
-
-                // Draw background connections (only between nodes that are close to each other)
-                ctx.lineWidth = 1.5;
-                
-                for (let i = 0; i < nodeData.length; i++) {
-                    const nodeA = nodeData[i];
-                    const xA = centerX + nodeA.baseX;
-                    const yA = centerY + nodeA.baseY;
-
-                    for (let j = i + 1; j < nodeData.length; j++) {
-                        const nodeB = nodeData[j];
-                        const dx = nodeA.baseX - nodeB.baseX;
-                        const dy = nodeA.baseY - nodeB.baseY;
-                        const dist = Math.sqrt(dx*dx + dy*dy);
-
-                        // If nodes are neighbors, draw line
-                        // Threshold depends on spacing D (max distance: Ring neighbor spacing ~1.5 * D)
-                        if (dist < D * 1.6) {
-                            const xB = centerX + nodeB.baseX;
-                            const yB = centerY + nodeB.baseY;
-
-                            // Draw glowing connections
-                            const isLineActive = (activeNodeIndex === i || activeNodeIndex === j);
-                            
-                            ctx.beginPath();
-                            ctx.moveTo(xA, yA);
-                            ctx.lineTo(xB, yB);
-                            
-                            if (isLineActive) {
-                                ctx.strokeStyle = 'rgba(0, 242, 254, 0.6)';
-                                ctx.shadowBlur = 10;
-                                ctx.shadowColor = '#00f2fe';
-                            } else {
-                                ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-                                ctx.shadowBlur = 0;
-                            }
-                            ctx.stroke();
-                        }
-                    }
-                }
-
-                // Reset shadow mapping
-                ctx.shadowBlur = 0;
-
-                // Update element positions and scales in DOM
-                nodeData.forEach((node, i) => {
-                    // Apple Watch app launcher effect:
-                    // Nodes closer to the visual center of the CONTAINER are scaled larger (up to 1.15)
-                    // Nodes closer to the edges of the CONTAINER scale down (down to 0.7)
-                    const xInContainer = centerX + node.baseX;
-                    const yInContainer = centerY + node.baseY;
-                    
-                    const dxFromCenter = xInContainer - canvas.width / 2;
-                    const dyFromCenter = yInContainer - canvas.height / 2;
-                    const distFromCenter = Math.sqrt(dxFromCenter * dxFromCenter + dyFromCenter * dyFromCenter);
-                    
-                    // Center of container has max scale, fading out to edges
-                    const maxDist = Math.max(canvas.width, canvas.height) / 2;
-                    let watchScale = 1 - (distFromCenter / maxDist) * 0.45;
-                    watchScale = Math.max(0.65, Math.min(1.15, watchScale));
-
-                    // Interpolate hover scale
-                    node.scale += (node.targetScale - node.scale) * 0.15;
-                    
-                    // Final transform combined: positioning + current scale
-                    const finalScale = node.scale * watchScale;
-                    node.el.style.transform = `translate(calc(-50% + ${panX + node.baseX}px), calc(-50% + ${panY + node.baseY}px)) scale(${finalScale})`;
-                });
-            }
+            let startY = 0;
+            let startAngle = 0;
+            let autoSpinSpeed = 0.15; // Speed of auto-rotation
 
             // Animation Loop
             function tick() {
-                // Smooth pan lerping
-                panX += (targetPanX - panX) * 0.1;
-                panY += (targetPanY - panY) * 0.1;
+                if (!isDragging) {
+                    currentAngle += autoSpinSpeed;
+                } else {
+                    currentAngle += (targetAngle - currentAngle) * 0.1;
+                }
 
-                draw();
+                // Apply rotation to the wheel container
+                // Rotate slightly on the Y-axis (-18deg) to show the 3D cylindrical curve
+                wheel.style.transform = `rotateY(-18deg) rotateX(${-currentAngle}deg)`;
+
+                // Dynamic opacity and scaling based on position
+                items.forEach((item, i) => {
+                    const itemAngle = i * angleBetween;
+                    // Difference between current cylinder rotation and item position angle
+                    let diff = (itemAngle - currentAngle) % 360;
+                    if (diff < 0) diff += 360;
+                    if (diff > 180) diff -= 360;
+
+                    // diff is between -180 and 180 degrees.
+                    // Items in front have diff close to 0.
+                    const absDiff = Math.abs(diff);
+
+                    // Fade out items as they rotate to the back (absDiff close to 90-180)
+                    const opacity = Math.max(0, 1 - (absDiff / 90));
+                    
+                    // Scale up items slightly in the center front
+                    const scale = Math.max(0.8, 1.1 - (absDiff / 90) * 0.3);
+
+                    const content = item.querySelector('.skills-wheel-item-content');
+                    if (content) {
+                        content.style.opacity = opacity;
+                        content.style.transform = `scale(${scale})`;
+                    }
+                });
+
                 requestAnimationFrame(tick);
             }
 
-            // Mouse / Touch drag handlers (Panning)
+            // Drag / Touch Spin functionality
+            const container = wheel.parentElement;
+
             function startDrag(e) {
                 isDragging = true;
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                startX = clientX - targetPanX;
-                startY = clientY - targetPanY;
-                parent.style.cursor = 'grabbing';
+                const clientY = e.touches ? e.touches[0].clientX : e.clientX;
+                startY = clientY;
+                startAngle = currentAngle;
+                container.style.cursor = 'grabbing';
             }
 
             function drag(e) {
                 if (!isDragging) return;
-                const clientX = e.touches ? e.touches[0].clientX : e.clientX;
                 const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                
-                let newPanX = clientX - startX;
-                let newPanY = clientY - startY;
-
-                // Restrict boundary so cloud doesn't drag too far off center
-                const maxPan = window.innerWidth <= 768 ? 120 : 200;
-                targetPanX = Math.max(-maxPan, Math.min(maxPan, newPanX));
-                targetPanY = Math.max(-maxPan, Math.min(maxPan, newPanY));
+                const deltaY = clientY - startY;
+                // 1px of drag = 0.5 degrees of rotation
+                targetAngle = startAngle - (deltaY * 0.5);
+                currentAngle = targetAngle;
             }
 
             function stopDrag() {
                 isDragging = false;
-                parent.style.cursor = 'grab';
+                container.style.cursor = 'grab';
             }
 
-            // Hover effects
-            nodes.forEach((el, index) => {
-                el.addEventListener('mouseenter', () => {
-                    if (nodeData[index]) {
-                        nodeData[index].targetScale = 1.3;
-                        nodeData[index].isHovered = true;
-                        
-                        // Scale adjacent neighbors
-                        nodeData.forEach((other, oi) => {
-                            if (oi !== index) {
-                                const dx = nodeData[index].baseX - other.baseX;
-                                const dy = nodeData[index].baseY - other.baseY;
-                                const dist = Math.sqrt(dx*dx + dy*dy);
-                                if (dist < D * 1.6) {
-                                    other.targetScale = 1.1;
-                                }
-                            }
-                        });
-                    }
-                });
-
-                el.addEventListener('mouseleave', () => {
-                    nodeData.forEach((node) => {
-                        node.targetScale = 1.0;
-                        node.isHovered = false;
-                    });
-                });
-            });
-
-            // Listeners
-            parent.addEventListener('mousedown', startDrag);
+            container.addEventListener('mousedown', startDrag);
             window.addEventListener('mousemove', drag);
             window.addEventListener('mouseup', stopDrag);
 
-            parent.addEventListener('touchstart', startDrag, { passive: true });
+            container.addEventListener('touchstart', startDrag, { passive: true });
             window.addEventListener('touchmove', drag, { passive: true });
             window.addEventListener('touchend', stopDrag);
 
-            window.addEventListener('resize', resizeCanvas);
-            
-            // Initialize
-            setTimeout(() => {
-                resizeCanvas();
-                tick();
-            }, 100);
+            tick();
         })();
 
 
