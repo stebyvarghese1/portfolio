@@ -374,7 +374,7 @@ nav.scrolled {
     /* Tiny rounded corners */
     overflow: hidden;
     background: linear-gradient(135deg, var(--primary), var(--secondary));
-    padding: 6px;
+    padding: 2px;
     box-shadow: 0 0 50px rgba(0, 242, 254, 0.2);
     /* Performance & Smoothness stuff */
     will-change: transform;
