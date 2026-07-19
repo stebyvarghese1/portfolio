@@ -4,8 +4,8 @@
     --primary: #00f2fe;
     --secondary: #4facfe;
     --accent: #f093fb;
-    --bg-darker: #050510;
-    --bg-dark: #0a0a20;
+    --bg-darker: #060614;
+    --bg-dark: #0c0c24;
     --text-main: #ffffff;
     --text-dim: rgba(255, 255, 255, 0.7);
     --glass-bg: rgba(5, 5, 16, 0.5);
@@ -46,26 +46,128 @@ body {
 
 /* Background Elements */
 
-#stars-canvas {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: -1;
-    pointer-events: none;
-    opacity: 0.8;
-}
-
 .gradient-bg {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: radial-gradient(circle at 50% 50%, rgba(79, 172, 254, 0.05), transparent 70%);
-    z-index: -1;
+    background: 
+        radial-gradient(circle at 15% 15%, rgba(0, 242, 254, 0.10) 0%, transparent 50%),
+        radial-gradient(circle at 85% 20%, rgba(79, 172, 254, 0.10) 0%, transparent 45%),
+        radial-gradient(circle at 50% 50%, rgba(240, 147, 251, 0.06) 0%, transparent 60%),
+        radial-gradient(circle at 80% 85%, rgba(0, 242, 254, 0.08) 0%, transparent 50%),
+        radial-gradient(circle at 20% 80%, rgba(79, 172, 254, 0.08) 0%, transparent 55%);
+    background-color: var(--bg-darker);
+    z-index: -2;
     pointer-events: none;
+}
+
+/* Elegant Tech Grid Overlay */
+.gradient-bg::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-image: 
+        linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+    background-size: 40px 40px;
+    background-position: center;
+    -webkit-mask-image: radial-gradient(ellipse at 50% 50%, black 40%, transparent 80%);
+    mask-image: radial-gradient(ellipse at 50% 50%, black 40%, transparent 80%);
+    opacity: 0.8;
+}
+
+/* 3D Starfield Container */
+.stars-3d-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    perspective: 800px;
+    z-index: -1;
+}
+
+/* 3D Star Layers */
+.stars-layer {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    transform-style: preserve-3d;
+    backface-visibility: hidden;
+    will-change: transform;
+}
+
+.stars-layer-1 {
+    background-image: 
+        radial-gradient(1px 1px at 15% 15%, rgba(255, 255, 255, 0.4), transparent),
+        radial-gradient(1px 1px at 35% 45%, rgba(255, 255, 255, 0.35), transparent),
+        radial-gradient(1.5px 1.5px at 55% 25%, rgba(255, 255, 255, 0.4), transparent),
+        radial-gradient(1px 1px at 75% 65%, rgba(255, 255, 255, 0.3), transparent),
+        radial-gradient(1px 1px at 95% 35%, rgba(255, 255, 255, 0.4), transparent),
+        radial-gradient(1.5px 1.5px at 20% 85%, rgba(255, 255, 255, 0.4), transparent),
+        radial-gradient(1px 1px at 45% 75%, rgba(255, 255, 255, 0.3), transparent),
+        radial-gradient(1.5px 1.5px at 65% 90%, rgba(255, 255, 255, 0.4), transparent),
+        radial-gradient(1px 1px at 85% 70%, rgba(255, 255, 255, 0.3), transparent);
+    background-repeat: repeat;
+    background-size: 300px 300px;
+    animation: zoomStars 28s linear infinite;
+    opacity: 0.6;
+}
+
+.stars-layer-2 {
+    background-image: 
+        radial-gradient(1.5px 1.5px at 25% 10%, rgba(255, 255, 255, 0.5), transparent),
+        radial-gradient(1.5px 1.5px at 45% 55%, rgba(255, 255, 255, 0.4), transparent),
+        radial-gradient(1.5px 1.5px at 70% 20%, rgba(255, 255, 255, 0.5), transparent),
+        radial-gradient(1.5px 1.5px at 80% 60%, rgba(255, 255, 255, 0.4), transparent),
+        radial-gradient(2px 2px at 15% 75%, rgba(255, 255, 255, 0.5), transparent),
+        radial-gradient(1.5px 1.5px at 50% 80%, rgba(255, 255, 255, 0.35), transparent),
+        radial-gradient(2px 2px at 85% 85%, rgba(255, 255, 255, 0.5), transparent);
+    background-repeat: repeat;
+    background-size: 400px 400px;
+    animation: zoomStars 20s linear infinite;
+    animation-delay: -7s;
+    opacity: 0.7;
+}
+
+.stars-layer-3 {
+    background-image: 
+        radial-gradient(2px 2px at 10% 30%, rgba(255, 255, 255, 0.6), transparent),
+        radial-gradient(2.5px 2.5px at 50% 30%, rgba(255, 255, 255, 0.7), transparent),
+        radial-gradient(2px 2px at 80% 40%, rgba(255, 255, 255, 0.5), transparent),
+        radial-gradient(2.5px 2.5px at 30% 70%, rgba(255, 255, 255, 0.6), transparent),
+        radial-gradient(2px 2px at 70% 80%, rgba(255, 255, 255, 0.5), transparent);
+    background-repeat: repeat;
+    background-size: 500px 500px;
+    animation: zoomStars 14s linear infinite;
+    animation-delay: -9.3s;
+    opacity: 0.8;
+}
+
+/* GPU-Accelerated 3D Zoom Effect */
+@keyframes zoomStars {
+    0% {
+        transform: translate3d(0, 0, -800px);
+        opacity: 0;
+    }
+    10% {
+        opacity: 1;
+    }
+    85% {
+        opacity: 1;
+    }
+    100% {
+        transform: translate3d(0, 0, 400px);
+        opacity: 0;
+    }
 }
 
 /* Typography Customization */
@@ -515,38 +617,9 @@ section {
     margin-top: 25vh;
     /* Increased distance from heading to first card */
     padding-bottom: 0;
-    margin-bottom: -460px;
+    margin-bottom: -480px;
     /* Negative margin to make the section container 'end' at the top of the last card */
     /* This causes the sticky heading to scroll away with the top of the last card */
-}
-
-@media (max-width: 768px) {
-    .projects-stack {
-        gap: 50vh;
-        /* More gap for mobile to feel the scroll */
-        margin-top: 20vh;
-        padding-bottom: 0;
-        margin-bottom: -520px;
-        /* Matches mobile card height to sync header exit */
-    }
-
-    #skills {
-        padding-top: 550px;
-        /* Mobile compensation */
-    }
-}
-
-@media (max-width: 968px) {
-    .projects-stack {
-        gap: 45vh;
-    }
-
-    .stack-card {
-        top: 150px;
-        /* Adjusted for smaller cards */
-        height: 540px;
-        /* Reduced from 600px */
-    }
 }
 
 .stack-card {
@@ -554,8 +627,8 @@ section {
     top: 180px;
     /* Increased offset to create more distance from the sticky title */
     width: 100%;
-    height: 460px;
-    /* Reduced from 520px */
+    height: 480px;
+    /* Increased from 460px to give more breathing room */
     display: flex;
     align-items: center;
     justify-content: center;
@@ -564,28 +637,9 @@ section {
     transition: top 0.3s, transform 0.3s;
 }
 
-@media (max-width: 768px) {
-    .stack-card {
-        position: sticky;
-        top: 150px;
-        /* Mobile gap adjustment */
-        height: 520px;
-        /* Reduced from 580px */
-        margin-bottom: 0;
-    }
-}
-
-@media (max-width: 968px) {
-    .projects-stack {
-        gap: 45vh;
-    }
-
-    .stack-card {
-        top: 150px;
-        /* Adjusted for smaller cards */
-        height: 540px;
-        /* Reduced from 600px */
-    }
+.stack-card:hover .project-inner {
+    border-color: var(--primary);
+    transform: translateY(-5px);
 }
 
 .project-inner {
@@ -607,28 +661,9 @@ section {
     transition: transform 0.5s var(--transition);
 }
 
-@media (max-width: 768px) {
-    .project-inner {
-        display: flex !important;
-        flex-direction: column !important;
-        padding: 1.5rem !important;
-        gap: 1.5rem !important;
-        border-radius: 20px !important;
-        text-align: center !important;
-        width: 100% !important;
-        height: 100% !important;
-    }
-}
-
-.stack-card:hover .project-inner {
-    border-color: var(--primary);
-    transform: translateY(-5px);
-}
-
 .project-visual {
     width: 100%;
-    height: 300px;
-    /* Reduced from 350px */
+    height: 100%; /* Stretch vertically to match the card height */
     border-radius: 20px;
     overflow: hidden;
     background: rgba(0, 0, 0, 0.3);
@@ -651,17 +686,19 @@ section {
     flex: 1;
     flex-direction: column;
     justify-content: flex-start;
+    height: 100%; /* Take full vertical height of the inner container */
     padding-top: 0.5rem;
 }
 
 .project-details h3 {
-    font-size: 2rem;
-    margin-bottom: 0.5rem;
+    font-size: 1.8rem;
+    margin-bottom: 0.75rem;
     color: var(--primary);
+    line-height: 1.2;
 }
 
 .project-details p {
-    font-size: 1.05rem;
+    font-size: 1rem;
     line-height: 1.6;
     color: var(--text-dim);
     margin-bottom: 1.25rem;
@@ -670,38 +707,31 @@ section {
     line-clamp: 4;
     -webkit-box-orient: vertical;
     overflow: hidden;
-    height: 6.4rem;
-    /* Strictly fixed height for 4 lines */
+    height: auto; /* Remove strictly fixed height */
+    max-height: 6.4rem;
 }
 
 .tech-tags {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.6rem;
-    padding: 0.5rem 0;
+    gap: 0.5rem;
+    padding: 0.25rem 0;
     margin-bottom: 1.5rem;
     width: 100%;
-    height: 85px;
-    /* Strictly fixed height for tags */
+    height: auto; /* Remove strictly fixed height */
+    max-height: 80px; /* Limit height to prevent overflow of too many tags */
     overflow: hidden;
     /* Prevent expansion if too many tags */
     align-content: flex-start;
 }
 
-@media (max-width: 768px) {
-    .tech-tags {
-        justify-content: center;
-        margin-bottom: 1.5rem;
-    }
-}
-
 .tag {
     flex: 0 0 auto;
-    padding: 0.5rem 1.2rem;
+    padding: 0.4rem 1rem;
     background: rgba(255, 255, 255, 0.05);
     border: 1px solid var(--glass-border);
     border-radius: 50px;
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     color: var(--primary);
     white-space: nowrap;
     transition: 0.3s;
@@ -713,55 +743,199 @@ section {
     transform: translateY(-2px);
 }
 
+.project-actions {
+    margin-top: auto; /* Push actions to the bottom */
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    width: 100%;
+}
 
+.project-actions .btn {
+    padding: 0.8rem 1.8rem;
+    font-size: 0.9rem;
+}
+
+/* Tablet Media Queries (max-width: 968px) */
+@media (max-width: 968px) {
+    .projects-stack {
+        gap: 45vh;
+        margin-bottom: -500px; /* Matches card height */
+    }
+
+    .stack-card {
+        top: 150px;
+        height: 500px;
+    }
+
+    #skills {
+        padding-top: 540px; /* Compensation */
+    }
+
+    .project-inner {
+        gap: 2rem;
+        padding: 2rem;
+    }
+
+    .project-details h3 {
+        font-size: 1.6rem;
+    }
+
+    .project-details p {
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        max-height: 4.8rem;
+    }
+
+    .tech-tags {
+        max-height: 75px;
+        margin-bottom: 1.25rem;
+    }
+}
+
+/* Mobile Media Queries (max-width: 768px) */
 @media (max-width: 768px) {
+    .projects-stack {
+        gap: 45vh;
+        margin-top: 15vh;
+        margin-bottom: -520px; /* Matches card height */
+    }
+
+    .stack-card {
+        top: 130px;
+        height: 520px;
+    }
+
+    #skills {
+        padding-top: 560px; /* Compensation */
+    }
+
+    .project-inner {
+        display: flex !important;
+        flex-direction: column !important;
+        padding: 1.5rem !important;
+        gap: 1.25rem !important;
+        border-radius: 24px !important;
+        text-align: center !important;
+    }
+
     .project-visual {
-        height: 200px !important;
-        margin-bottom: 0.5rem;
+        height: 160px !important;
+        margin-bottom: 0;
     }
 
     .project-details {
-        display: flex;
-        flex-direction: column;
         align-items: center;
         width: 100%;
+        height: calc(100% - 172.5px); /* 160px visual + 12.5px gap */
+        padding-top: 0;
     }
 
     .project-details h3 {
         font-size: 1.4rem !important;
-        margin-bottom: 0.75rem !important;
+        margin-bottom: 0.5rem !important;
     }
 
     .project-details p {
         font-size: 0.9rem !important;
         line-height: 1.5 !important;
-        margin-bottom: 1.25rem !important;
+        margin-bottom: 0.75rem !important;
+        -webkit-line-clamp: 3;
+        line-clamp: 3;
+        max-height: 4.5rem;
+    }
+
+    .tech-tags {
+        justify-content: center;
+        margin-bottom: 1rem;
+        max-height: 70px;
+        gap: 0.4rem;
+        padding: 0;
+    }
+
+    .tag {
+        padding: 0.35rem 0.8rem;
+        font-size: 0.75rem;
     }
 
     .project-actions {
-        margin-top: 0 !important;
+        margin-top: auto !important;
+        display: flex !important;
+        flex-direction: row !important;
+        gap: 0.75rem !important;
         width: 100%;
     }
 
     .project-actions .btn {
-        width: 100%;
+        flex: 1;
+        width: auto !important;
         justify-content: center;
-        padding: 0.8rem 1.5rem !important;
+        padding: 0.7rem 1.2rem !important;
+        font-size: 0.85rem !important;
+        white-space: nowrap;
     }
 }
 
+/* Small Screen Media Queries (max-width: 480px) */
 @media (max-width: 480px) {
+    .projects-stack {
+        gap: 40vh;
+        margin-bottom: -480px; /* Matches card height */
+    }
+
+    .stack-card {
+        top: 110px;
+        height: 480px;
+    }
+
+    #skills {
+        padding-top: 520px; /* Compensation */
+    }
+
     .project-inner {
-        padding: 1.25rem;
-        gap: 1.5rem;
+        padding: 1.25rem !important;
+        gap: 1rem !important;
     }
 
     .project-visual {
-        height: 180px;
+        height: 130px !important;
+    }
+
+    .project-details {
+        height: calc(100% - 146px); /* 130px visual + 16px gap */
     }
 
     .project-details h3 {
-        font-size: 1.5rem;
+        font-size: 1.25rem !important;
+        margin-bottom: 0.4rem !important;
+    }
+
+    .project-details p {
+        font-size: 0.85rem !important;
+        margin-bottom: 0.5rem !important;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
+        max-height: 2.6rem;
+    }
+
+    .tech-tags {
+        margin-bottom: 0.75rem;
+        max-height: 35px;
+    }
+
+    .tag {
+        padding: 0.35rem 0.6rem;
+        font-size: 0.7rem;
+    }
+
+    .project-actions {
+        gap: 0.5rem !important;
+    }
+
+    .project-actions .btn {
+        padding: 0.6rem 0.8rem !important;
+        font-size: 0.8rem !important;
+        gap: 0.4rem;
     }
 }
 
