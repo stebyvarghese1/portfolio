@@ -1052,11 +1052,10 @@ section {
     right: -130px;
     width: 260px;
     height: 120%;
-    background: #060614; /* Match page background */
+    background: transparent; /* Transparent backdrop to adapt to background */
     border-radius: 50%;
-    border-left: 2px solid var(--primary); /* Curving border line */
-    box-shadow: -15px 0 35px rgba(0, 242, 254, 0.15), 
-                inset 15px 0 30px rgba(0, 0, 0, 0.8);
+    border-left: 2.5px solid var(--primary); /* Curving border line */
+    box-shadow: -15px 0 35px rgba(0, 242, 254, 0.2); 
     z-index: 15;
     pointer-events: none;
 }
@@ -1067,6 +1066,10 @@ section {
     height: 80px; /* Base item height */
     transform-style: preserve-3d;
     transition: transform 0.1s ease-out;
+    
+    /* Alpha mask to fade out items dynamically as they approach the right edge */
+    -webkit-mask-image: linear-gradient(to right, black 50%, transparent 90%);
+    mask-image: linear-gradient(to right, black 50%, transparent 90%);
 }
 
 .skills-wheel-item {
