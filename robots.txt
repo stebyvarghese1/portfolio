@@ -4,4 +4,4 @@ Disallow: /admin
 Disallow: /login
 Allow: /
 
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: https://www.stebyvarghese.in/sitemap.xml
