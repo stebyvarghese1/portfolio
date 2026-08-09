@@ -13,6 +13,11 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static', 'img'),
                                'favicon_icon_1766679969783.png', mimetype='image/png')
 
+@app.route('/robots.txt')
+@app.route('/sitemap.xml')
+def static_from_root():
+    return send_from_directory(app.root_path, request.path[1:])
+
 app.config['SECRET_KEY'] = 'steby_secret_key_2025'
 
 # Database configuration - use PostgreSQL if DATABASE_URL is set, otherwise fallback to SQLite
