@@ -2,13 +2,95 @@
 <html lang="en">
 
 <head>
+    <!-- Basic -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
-    <title>Steby Varghese | Portfolio</title>
-    <link rel="icon" type="image/png" href="/favicon.png">
-    <link rel="canonical" href="https://www.stebyvarghese.in/">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+    >
+
+    <!-- SEO -->
+    <title>Steby Varghese | Cybersecurity & Software Engineer</title>
+
+    <meta
+        name="description"
+        content="Steby Varghese is a cybersecurity enthusiast and software engineer specializing in penetration testing, web security, software development, and security research."
+    >
+
+    <meta name="author" content="Steby Varghese">
+
+    <!-- Canonical -->
+    <link
+        rel="canonical"
+        href="https://www.stebyvarghese.in/"
+    >
+
+    <!-- Favicon -->
+    <link
+        rel="icon"
+        type="image/png"
+        href="{{ url_for('static', filename='favicon.png') }}"
+    >
+
+    <link
+        rel="apple-touch-icon"
+        href="{{ url_for('static', filename='favicon.png') }}"
+    >
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+
+    <meta
+        property="og:url"
+        content="https://www.stebyvarghese.in/"
+    >
+
+    <meta
+        property="og:title"
+        content="Steby Varghese | Cybersecurity & Software Engineer"
+    >
+
+    <meta
+        property="og:description"
+        content="Cybersecurity enthusiast and software engineer specializing in penetration testing, web security, software development, and security research."
+    >
+
+    <meta
+        property="og:image"
+        content="https://www.stebyvarghese.in/static/og-image.png"
+    >
+
+    <meta
+        property="og:site_name"
+        content="Steby Varghese"
+    >
+
+    <!-- Person Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Steby Varghese",
+        "url": "https://www.stebyvarghese.in/",
+        "jobTitle": "Cybersecurity Enthusiast and Software Engineer",
+        "description": "Cybersecurity enthusiast and software engineer specializing in penetration testing, web security, software development, and security research.",
+        "sameAs": [
+            "https://github.com/stebyvarghese1"
+        ]
+    }
+    </script>
+
+    <!-- Styles -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
 </head>
 
 <body>
