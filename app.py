@@ -22,9 +22,25 @@ def static_from_root():
 
 app.config['SECRET_KEY'] = 'steby_secret_key_2025'
 
-# Database configuration - use PostgreSQL if DATABASE_URL is set, otherwise fallback to SQLite
+import socket
+from urllib.parse import urlparse
+
+# Database configuration - use PostgreSQL if DATABASE_URL is set and reachable, otherwise fallback to SQLite
 database_url = os.environ.get('DATABASE_URL')
+use_sqlite = True
+
 if database_url:
+    try:
+        parsed = urlparse(database_url)
+        host = parsed.hostname
+        if host:
+            # Check if host is resolvable (online check)
+            socket.gethostbyname(host)
+            use_sqlite = False
+    except Exception as e:
+        print(f"PostgreSQL connection test failed: {e}. Falling back to SQLite.")
+
+if not use_sqlite:
     # SQL Alchemy requires postgresql:// instead of postgres://
     if database_url.startswith('postgres://'):
         database_url = database_url.replace('postgres://', 'postgresql://', 1)
@@ -70,6 +86,15 @@ class Education(db.Model):
     degree = db.Column(db.String(100), nullable=False)
     institution = db.Column(db.String(100), nullable=False)
     duration = db.Column(db.String(50))
+    logo_url = db.Column(db.Text)
+
+class Certificate(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String(200), nullable=False)
+    issuer = db.Column(db.String(100), nullable=False)
+    date_earned = db.Column(db.String(50))
+    credential_link = db.Column(db.Text)
+    logo_url = db.Column(db.Text)
 
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -84,8 +109,9 @@ def index():
     projects = Project.query.order_by(Project.order.asc()).all()
     skills = Skill.query.all()
     education = Education.query.all()
+    certificates = Certificate.query.all()
     profile = Profile.query.first()
-    return render_template('index.html', projects=projects, skills=skills, education=education, profile=profile)
+    return render_template('index.html', projects=projects, skills=skills, education=education, certificates=certificates, profile=profile)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -106,9 +132,10 @@ def admin():
     projects = Project.query.order_by(Project.order.asc()).all()
     skills = Skill.query.all()
     education = Education.query.all()
+    certificates = Certificate.query.all()
     profile = Profile.query.first()
     current_admin = User.query.get(session['user_id'])
-    return render_template('admin.html', projects=projects, skills=skills, education=education, profile=profile, current_admin=current_admin)
+    return render_template('admin.html', projects=projects, skills=skills, education=education, certificates=certificates, profile=profile, current_admin=current_admin)
 
 @app.route('/admin/profile/update', methods=['POST'])
 def update_profile():
@@ -212,8 +239,9 @@ def add_education():
     degree = request.form.get('degree')
     institution = request.form.get('institution')
     duration = request.form.get('duration')
+    logo_url = request.form.get('logo_url')
     if degree and institution:
-        new_edu = Education(degree=degree, institution=institution, duration=duration)
+        new_edu = Education(degree=degree, institution=institution, duration=duration, logo_url=logo_url)
         db.session.add(new_edu)
         db.session.commit()
     return redirect(url_for('admin'))
@@ -224,6 +252,35 @@ def delete_education(id):
     edu = Education.query.get(id)
     if edu:
         db.session.delete(edu)
+        db.session.commit()
+    return redirect(url_for('admin'))
+
+@app.route('/admin/certificate/add', methods=['POST'])
+def add_certificate():
+    if 'user_id' not in session: return redirect(url_for('login'))
+    title = request.form.get('title')
+    issuer = request.form.get('issuer')
+    date_earned = request.form.get('date_earned')
+    credential_link = request.form.get('credential_link')
+    logo_url = request.form.get('logo_url')
+    if title and issuer:
+        new_cert = Certificate(
+            title=title,
+            issuer=issuer,
+            date_earned=date_earned,
+            credential_link=credential_link,
+            logo_url=logo_url
+        )
+        db.session.add(new_cert)
+        db.session.commit()
+    return redirect(url_for('admin'))
+
+@app.route('/admin/certificate/delete/<int:id>')
+def delete_certificate(id):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    cert = Certificate.query.get(id)
+    if cert:
+        db.session.delete(cert)
         db.session.commit()
     return redirect(url_for('admin'))
 
@@ -300,6 +357,27 @@ if __name__ == '__main__':
         except Exception as e:
             db.session.rollback()
             
+        try:
+            db.session.execute(db.text('ALTER TABLE education ADD COLUMN IF NOT EXISTS logo_url TEXT'))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+
+        try:
+            db.session.execute(db.text('''
+                CREATE TABLE IF NOT EXISTS certificate (
+                    id SERIAL PRIMARY KEY,
+                    title VARCHAR(200) NOT NULL,
+                    issuer VARCHAR(100) NOT NULL,
+                    date_earned VARCHAR(50),
+                    credential_link TEXT,
+                    logo_url TEXT
+                )
+            '''))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
         # Ensure at least one Profile record exists
         if not Profile.query.first():
             db.session.add(Profile(
@@ -322,6 +400,23 @@ if __name__ == '__main__':
         if not Education.query.first():
             db.session.add(Education(degree='Master of Computer Applications (Pursuing)', institution='CCSIT of Calicut University', duration='2024 - 2026'))
             db.session.add(Education(degree='Bachelor of Computer Applications', institution='Yuvakshetra institute of management studies', duration='2021 - 2024'))
+            
+        # Certificates
+        if not Certificate.query.first():
+            db.session.add(Certificate(
+                title='Google Cybersecurity Professional Certificate',
+                issuer='Coursera / Google',
+                date_earned='Aug 2024',
+                credential_link='https://coursera.org/verify/professional-cert/google-cybersecurity',
+                logo_url='https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=800'
+            ))
+            db.session.add(Certificate(
+                title='Certified Ethical Hacker (CEH) Course',
+                issuer='EC-Council',
+                date_earned='June 2024',
+                credential_link='#',
+                logo_url=''
+            ))
             
         # Skills
         if not Skill.query.first():
