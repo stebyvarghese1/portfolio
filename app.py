@@ -13,6 +13,7 @@ def favicon():
     return send_from_directory(os.path.join(app.root_path, 'static', 'img'),
                                'favicon_icon_1766679969783.png', mimetype='image/png')
 
+@app.route('/favicon.png')
 @app.route('/robots.txt')
 @app.route('/sitemap.xml')
 def static_from_root():
