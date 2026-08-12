@@ -14,6 +14,7 @@ def favicon():
                                'favicon_icon_1766679969783.png', mimetype='image/png')
 
 @app.route('/favicon.png')
+@app.route('/og-image.png')
 @app.route('/robots.txt')
 @app.route('/sitemap.xml')
 def static_from_root():
