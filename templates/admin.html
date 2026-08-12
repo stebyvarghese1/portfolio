@@ -50,6 +50,9 @@
                 <a href="#education" class="admin-nav-item">
                     <i class="fas fa-graduation-cap"></i> Education
                 </a>
+                <a href="#certificates" class="admin-nav-item">
+                    <i class="fas fa-certificate"></i> Certificates
+                </a>
                 <a href="#credentials" class="admin-nav-item">
                     <i class="fas fa-key"></i> Credentials
                 </a>
@@ -130,7 +133,13 @@
                         <i class="fas fa-graduation-cap"
                             style="font-size: 2rem; color: var(--secondary); margin-bottom: 1rem;"></i>
                         <h2 style="font-size: 2.5rem;">{{ education|length }}</h2>
-                        <p style="color: var(--text-dim);">Certifications</p>
+                        <p style="color: var(--text-dim);">Education</p>
+                    </div>
+                    <div class="glass-card" style="text-align: center; padding: 1.5rem;">
+                        <i class="fas fa-certificate"
+                            style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                        <h2 style="font-size: 2.5rem;">{{ certificates|length }}</h2>
+                        <p style="color: var(--text-dim);">Certificates</p>
                     </div>
                 </div>
             </section>
@@ -324,25 +333,110 @@
                                 <input type="text" name="institution" placeholder="e.g. University of..." required>
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Duration</label>
-                            <input type="text" name="duration" placeholder="e.g. 2021 - 2024">
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Duration</label>
+                                <input type="text" name="duration" placeholder="e.g. 2021 - 2024">
+                            </div>
+                            <div class="form-group">
+                                <label>Logo URL (Optional)</label>
+                                <input type="text" name="logo_url" placeholder="https://... or /static/img/...">
+                            </div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Add Education</button>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Add Education</button>
                     </form>
                 </div>
 
                 {% for edu in education %}
-                <div class="glass-card admin-flex-between" style="margin-bottom: 1.5rem;">
-                    <div>
-                        <h4 style="margin: 0;">{{ edu.degree }}</h4>
-                        <p style="color: var(--primary); font-size: 0.9rem;">{{ edu.institution }}</p>
-                        <p style="font-size: 0.8rem; opacity: 0.6;">{{ edu.duration }}</p>
+                <div class="glass-card admin-flex-between" style="margin-bottom: 1.5rem; align-items: center;">
+                    <div style="display: flex; gap: 1.5rem; align-items: center;">
+                        {% if edu.logo_url %}
+                        <img src="{{ edu.logo_url }}" alt="Logo" style="width: 50px; height: 50px; object-fit: contain; border-radius: 8px; background: rgba(255, 255, 255, 0.05); padding: 5px; flex-shrink: 0; border: 1px solid var(--glass-border);">
+                        {% else %}
+                        <div style="width: 50px; height: 50px; border-radius: 8px; background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="fas fa-graduation-cap" style="color: var(--primary); font-size: 1.2rem;"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h4 style="margin: 0;">{{ edu.degree }}</h4>
+                            <p style="color: var(--primary); font-size: 0.9rem;">{{ edu.institution }}</p>
+                            <p style="font-size: 0.8rem; opacity: 0.6;">{{ edu.duration }}</p>
+                        </div>
                     </div>
                     <a href="{{ url_for('delete_education', id=edu.id) }}" style="color: #ff4d4d;"
                         onclick="return confirm('Delete education entry?')">
                         <i class="fas fa-trash"></i>
                     </a>
+                </div>
+                {% endfor %}
+            </section>
+
+            <!-- Certificates Management -->
+            <section id="certificates" style="padding: 0; margin-bottom: 4rem;">
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 2rem;"><i class="fas fa-certificate"
+                            style="color: var(--primary);"></i> Add Certificate</h3>
+                    <form action="{{ url_for('add_certificate') }}" method="POST">
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Certificate Title</label>
+                                <input type="text" name="title" placeholder="e.g. AWS Certified Solutions Architect" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Issuing Organization</label>
+                                <input type="text" name="issuer" placeholder="e.g. Amazon Web Services" required>
+                            </div>
+                        </div>
+                        <div class="admin-grid-3-auto" style="grid-template-columns: 1fr 1.5fr auto; align-items: flex-end;">
+                            <div class="form-group" style="margin: 0;">
+                                <label>Date Earned</label>
+                                <input type="text" name="date_earned" placeholder="e.g. Aug 2024">
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label>Credential URL</label>
+                                <input type="text" name="credential_link" placeholder="Verification link...">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="height: fit-content; padding: 0.8rem 1.8rem;">Add Certificate</button>
+                        </div>
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label>Certificate Image URL (Optional)</label>
+                            <input type="text" name="logo_url" placeholder="https://... or certificate image link">
+                        </div>
+                    </form>
+                </div>
+
+                {% for cert in certificates %}
+                <div class="glass-card admin-flex-between" style="margin-bottom: 1.5rem; align-items: center;">
+                    <div style="display: flex; gap: 1.5rem; align-items: center;">
+                        {% if cert.logo_url %}
+                        <img src="{{ cert.logo_url }}" alt="Logo" style="width: 50px; height: 50px; object-fit: contain; border-radius: 8px; background: rgba(255, 255, 255, 0.05); padding: 5px; flex-shrink: 0; border: 1px solid var(--glass-border);">
+                        {% else %}
+                        <div style="width: 50px; height: 50px; border-radius: 8px; background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="fas fa-certificate" style="color: var(--primary); font-size: 1.2rem;"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h4 style="margin: 0;">{{ cert.title }}</h4>
+                            <p style="color: var(--primary); font-size: 0.9rem;">{{ cert.issuer }}</p>
+                            <p style="font-size: 0.8rem; opacity: 0.6;">{{ cert.date_earned }}</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <a href="{{ cert.credential_link if cert.credential_link else '#' }}" target="_blank" class="btn btn-primary" 
+                           {% if not cert.credential_link or cert.credential_link == '#' %}
+                           style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px; font-weight: 600; pointer-events: none; opacity: 0.5;"
+                           {% else %}
+                           style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px; font-weight: 600;"
+                           {% endif %}
+                           title="Verify Credential">
+                            <span>Verify</span>
+                            <i class="fas fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                        </a>
+                        <a href="{{ url_for('delete_certificate', id=cert.id) }}" style="color: #ff4d4d;"
+                            onclick="return confirm('Delete certificate entry?')">
+                            <i class="fas fa-trash"></i>
+                        </a>
+                    </div>
                 </div>
                 {% endfor %}
             </section>
