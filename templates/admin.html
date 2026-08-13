@@ -99,6 +99,18 @@
                     <form action="{{ url_for('update_profile') }}" method="POST">
                         <div class="admin-grid-2">
                             <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" name="name" value="{{ profile.name if profile else '' }}"
+                                    placeholder="Your full name..." required>
+                            </div>
+                            <div class="form-group">
+                                <label>Greeting Tagline</label>
+                                <input type="text" name="greeting" value="{{ profile.greeting if profile else '' }}"
+                                    placeholder="e.g. Hello, I'm" required>
+                            </div>
+                        </div>
+                        <div class="admin-grid-2">
+                            <div class="form-group">
                                 <label>Hero Photo URL</label>
                                 <input type="text" name="photo_url" value="{{ profile.photo_url if profile else '' }}"
                                     placeholder="Hero photo link..." required>
@@ -110,8 +122,47 @@
                                     placeholder="About photo link..." required>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
-                            <i class="fas fa-sync"></i> Update Profile Images
+                        <div class="form-group">
+                            <label>Hero Tagline / Description (Supports HTML highlights)</label>
+                            <textarea name="tagline" rows="3" placeholder="Tell us about yourself..." required>{{ profile.tagline if profile else '' }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>About Intro Paragraph (Supports HTML highlights)</label>
+                            <textarea name="about_intro" rows="3" placeholder="Intro paragraph on About section..." required>{{ profile.about_intro if profile else '' }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>About Description Paragraph (Supports HTML highlights)</label>
+                            <textarea name="about_text" rows="3" placeholder="Secondary description paragraph on About section..." required>{{ profile.about_text if profile else '' }}</textarea>
+                        </div>
+                        
+                        <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);"><i class="fas fa-chart-bar"></i> About Section Stats</h4>
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Stat 1 Value</label>
+                                <input type="text" name="stat_1_value" value="{{ profile.stat_1_value if profile else '' }}"
+                                    placeholder="e.g. 3+" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Stat 1 Label</label>
+                                <input type="text" name="stat_1_label" value="{{ profile.stat_1_label if profile else '' }}"
+                                    placeholder="e.g. Years project Experience" required>
+                            </div>
+                        </div>
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Stat 2 Value</label>
+                                <input type="text" name="stat_2_value" value="{{ profile.stat_2_value if profile else '' }}"
+                                    placeholder="e.g. 6+" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Stat 2 Label</label>
+                                <input type="text" name="stat_2_label" value="{{ profile.stat_2_label if profile else '' }}"
+                                    placeholder="e.g. Projects Completed" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;">
+                            <i class="fas fa-sync"></i> Update Profile Settings
                         </button>
                     </form>
                 </div>
@@ -290,25 +341,52 @@
                 <div class="glass-card" style="margin-bottom: 2rem;">
                     <h3 style="margin-bottom: 2rem;"><i class="fas fa-tools" style="color: var(--primary);"></i> Add
                         Skill</h3>
-                    <form action="{{ url_for('add_skill') }}" method="POST" class="admin-grid-3-auto">
-                        <div class="form-group" style="margin: 0;">
-                            <label>Skill Name</label>
-                            <input type="text" name="name" placeholder="e.g. Python" required>
+                    <form action="{{ url_for('add_skill') }}" method="POST">
+                        <div class="admin-grid-2">
+                            <div class="form-group" style="margin: 0;">
+                                <label>Skill Name</label>
+                                <input type="text" name="name" placeholder="e.g. Python" required>
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label>Category</label>
+                                <select name="category" id="skill-category-select" required>
+                                    <option value="" disabled selected>Select Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category }}">{{ category }}</option>
+                                    {% endfor %}
+                                    <option value="__new__">+ Add New Category...</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group" style="margin: 0;">
-                            <label>Category</label>
-                            <input type="text" name="category" placeholder="e.g. Frontend">
+                        <div class="form-group" id="new-category-group" style="margin-top: 1.5rem; display: none;">
+                            <label>New Category Name</label>
+                            <input type="text" name="new_category" id="new-category-input" placeholder="e.g. Databases">
                         </div>
-                        <button type="submit" class="btn btn-primary">Add Skill</button>
+                        <div class="admin-grid-2" style="margin-top: 1.5rem; align-items: flex-end;">
+                            <div class="form-group" style="margin: 0;">
+                                <label>Logo URL (Optional)</label>
+                                <input type="text" name="logo_url" placeholder="https://... or /static/img/...">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="height: fit-content;">Add Skill</button>
+                        </div>
                     </form>
                 </div>
 
                 <div class="admin-grid-stats">
                     {% for skill in skills %}
-                    <div class="glass-card admin-flex-between" style="padding: 1.5rem;">
-                        <div>
-                            <h4 style="margin: 0;">{{ skill.name }}</h4>
-                            <p style="font-size: 0.8rem; color: var(--text-dim);">{{ skill.category }}</p>
+                    <div class="glass-card admin-flex-between" style="padding: 1.5rem; align-items: center;">
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            {% if skill.logo_url %}
+                            <img src="{{ skill.logo_url }}" alt="{{ skill.name }}" style="width: 32px; height: 32px; object-fit: contain; border-radius: 4px; background: rgba(255, 255, 255, 0.05); padding: 2px; border: 1px solid var(--glass-border);">
+                            {% else %}
+                            <div style="width: 32px; height: 32px; border-radius: 4px; background: rgba(0, 242, 254, 0.05); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 242, 254, 0.15);">
+                                <i class="fas fa-tools" style="color: var(--primary); font-size: 0.9rem;"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h4 style="margin: 0;">{{ skill.name }}</h4>
+                                <p style="font-size: 0.8rem; color: var(--text-dim); margin: 0;">{{ skill.category }}</p>
+                            </div>
                         </div>
                         <a href="{{ url_for('delete_skill', id=skill.id) }}" style="color: #ff4d4d;"
                             onclick="return confirm('Delete skill?')">
@@ -545,6 +623,23 @@
                 editModal.style.display = 'block';
             });
         });
+
+        // Skill Category Select toggle logic
+        const skillCategorySelect = document.getElementById('skill-category-select');
+        if (skillCategorySelect) {
+            skillCategorySelect.addEventListener('change', function() {
+                const newCatGroup = document.getElementById('new-category-group');
+                const newCatInput = document.getElementById('new-category-input');
+                if (this.value === '__new__') {
+                    newCatGroup.style.display = 'block';
+                    newCatInput.setAttribute('required', 'required');
+                    newCatInput.focus();
+                } else {
+                    newCatGroup.style.display = 'none';
+                    newCatInput.removeAttribute('required');
+                }
+            });
+        }
     </script>
 </body>
 
