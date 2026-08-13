@@ -2,7 +2,6 @@
 <html lang="en">
 
 <head>
-    <script>document.documentElement.classList.add('js-enabled');</script>
     <!-- Basic -->
     <meta charset="UTF-8">
     <meta
@@ -522,7 +521,8 @@
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('active');
-                    observer.unobserve(entry.target);
+                } else {
+                    entry.target.classList.remove('active');
                 }
             });
         }, observerOptions);
@@ -613,7 +613,7 @@
 
             function updateSlider() {
                 // Since each category card has width 100%, translation is simply 100% per index
-                track.style.transform = `translateX(${-currentIndex * 100}%)`;
+                track.style.transform = `translate3d(${-currentIndex * 100}%, 0, 0)`;
 
                 // Update dots active state
                 const dots = Array.from(dotsContainer.querySelectorAll('.slider-dot'));
@@ -717,7 +717,7 @@
                 const currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
                 const diffX = currentX - startX;
                 currentTranslate = prevTranslate + diffX;
-                track.style.transform = `translateX(${currentTranslate}px)`;
+                track.style.transform = `translate3d(${currentTranslate}px, 0, 0)`;
             }
 
             function dragEnd(e) {
