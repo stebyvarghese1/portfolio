@@ -752,7 +752,7 @@
             VANTA.FOG({
                 el: "#vanta-bg",
                 mouseControls: true,
-                touchControls: true,
+                touchControls: false, // Disable touch controls to prevent page scroll conflicts on mobile
                 gyroControls: false,
                 minHeight: 200.00,
                 minWidth: 200.00,
@@ -761,8 +761,10 @@
                 lowlightColor: 0x4facfe,
                 baseColor: 0x060614,
                 blurFactor: 0.60,
-                speed: 1.50,
-                zoom: 1.00
+                speed: 1.00, // Reduced speed for smoother render updates
+                zoom: 1.00,
+                scale: 1.00,
+                scaleMobile: 2.00 // Downsample WebGL resolution on mobile (reduces GPU load by 75% with no visible difference on fog)
             });
         });
 
