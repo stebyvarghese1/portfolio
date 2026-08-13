@@ -108,7 +108,7 @@
 </head>
 
 <body>
-    <div class="gradient-bg">
+    <div class="gradient-bg" id="vanta-bg">
         <div class="stars-3d-container">
             <div class="stars-layer stars-layer-1"></div>
             <div class="stars-layer stars-layer-2"></div>
@@ -152,10 +152,28 @@
     <div class="container">
         <section id="home" class="hero reveal">
             <div class="hero-content">
-                <p class="tagline">Hello, I'm</p>
-                <h1><span class="text-gradient">STEBY</span> VARGHESE</h1>
-                <p class="description">Aspiring <span style="color: var(--primary);">Agentic AI Developer</span> & MCA
-                    Candidate. Crafting the future of web through AI Prompts.</p>
+                <p class="tagline">
+                    {% if profile and profile.greeting %}
+                        {{ profile.greeting }}
+                    {% else %}
+                        Hello, I'm
+                    {% endif %}
+                </p>
+                <h1>
+                    {% if profile and profile.name %}
+                        {% set name_parts = profile.name.split(' ') %}
+                        <span class="text-gradient">{{ name_parts[0] }}</span> {{ name_parts[1:] | join(' ') }}
+                    {% else %}
+                        <span class="text-gradient">STEBY</span> VARGHESE
+                    {% endif %}
+                </h1>
+                <p class="description">
+                    {% if profile and profile.tagline %}
+                        {{ profile.tagline | safe }}
+                    {% else %}
+                        Aspiring <span style="color: var(--primary);">Agentic AI Developer</span> & MCA Candidate. Crafting the future of web through AI Prompts.
+                    {% endif %}
+                </p>
                 <div class="hero-btns">
                     <a href="#projects" class="btn btn-primary">
                         <span>Explore Projects</span>
@@ -187,20 +205,52 @@
                 <div class="about-grid">
                     <div>
                         <p style="font-size: 1.2rem; margin-bottom: 1.5rem;">
-                            Hello! I'm <span class="text-gradient" style="font-weight: 700;">Steby Varghese</span>, a
-                            passionate developer based in India.
-                            Currently pursuing my MCA, I thrive at the intersection of design and functionality.
+                            {% if profile and profile.about_intro %}
+                                {{ profile.about_intro | safe }}
+                            {% else %}
+                                Hello! I'm <span class="text-gradient" style="font-weight: 700;">Steby Varghese</span>, a passionate developer based in India. Currently pursuing my MCA, I thrive at the intersection of design and functionality.
+                            {% endif %}
                         </p>
                         <p style="color: var(--text-dim); margin-bottom: 2rem;">
-                            My journey in tech is driven by a deep curiosity for how things work and a desire to build
-                            tools that solve real-world problems.
-                            From computer vision to agentic AI, I'm always looking for the next challenge.
+                            {% if profile and profile.about_text %}
+                                {{ profile.about_text | safe }}
+                            {% else %}
+                                My journey in tech is driven by a deep curiosity for how things work and a desire to build tools that solve real-world problems. From computer vision to agentic AI, I'm always looking for the next challenge.
+                            {% endif %}
                         </p>
                         <div class="stats-container">
-                            <div class="stat-item"><strong class="text-gradient">3+</strong><span>Years project
-                                    Experience</span></div>
-                            <div class="stat-item"><strong class="text-gradient">6+</strong><span>Projects
-                                    Completed</span></div>
+                            <div class="stat-item">
+                                <strong class="text-gradient">
+                                    {% if profile and profile.stat_1_value %}
+                                        {{ profile.stat_1_value }}
+                                    {% else %}
+                                        3+
+                                    {% endif %}
+                                </strong>
+                                <span>
+                                    {% if profile and profile.stat_1_label %}
+                                        {{ profile.stat_1_label }}
+                                    {% else %}
+                                        Years project Experience
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="stat-item">
+                                <strong class="text-gradient">
+                                    {% if profile and profile.stat_2_value %}
+                                        {{ profile.stat_2_value }}
+                                    {% else %}
+                                        6+
+                                    {% endif %}
+                                </strong>
+                                <span>
+                                    {% if profile and profile.stat_2_label %}
+                                        {{ profile.stat_2_label }}
+                                    {% else %}
+                                        Projects Completed
+                                    {% endif %}
+                                </span>
+                            </div>
                         </div>
                     </div>
                     <div class="glass-card about-image-card">
@@ -268,25 +318,40 @@
             <div class="section-head">
                 <h2>Technical <span class="text-gradient">Skills</span></h2>
             </div>
-            <div class="skills-wheel-container">
-                <div class="skills-wheel-mask"></div>
-                <div class="skills-wheel" id="skills-wheel">
-                    {% for skill in skills %}
-                    <div class="skills-wheel-item">
-                        <div class="skills-wheel-item-content">
-                            <i class="fas 
-                                {% if 'python' in skill.name.lower() %}fa-code
-                                {% elif 'html' in skill.name.lower() or 'css' in skill.name.lower() %}fa-laptop-code
-                                {% elif 'flask' in skill.name.lower() or 'django' in skill.name.lower() %}fa-server
-                                {% elif 'figma' in skill.name.lower() or 'design' in skill.name.lower() %}fa-pen-nib
-                                {% elif 'ai' in skill.name.lower() or 'ml' in skill.name.lower() %}fa-brain
-                                {% elif 'mobile' in skill.name.lower() or 'kivy' in skill.name.lower() %}fa-mobile-screen
-                                {% elif 'database' in skill.name.lower() or 'sql' in skill.name.lower() %}fa-database
-                                {% else %}fa-microchip{% endif %}"></i>
-                            <h3>{{ skill.name }}</h3>
+
+            <!-- Category Carousel Slide Layout -->
+            <div class="category-carousel">
+                <div class="category-track">
+                    {% for category in categories %}
+                    <div class="category-card">
+                        <h3 class="category-title text-gradient">{{ category }}</h3>
+                        <div class="skills-grid">
+                            {% for skill in skills if skill.category == category %}
+                            <div class="skill-card-item">
+                                <div class="skill-logo-box">
+                                    {% if skill.logo_url %}
+                                    <img src="{{ skill.logo_url }}" alt="{{ skill.name }}" loading="lazy">
+                                    {% else %}
+                                    <i class="fas fa-tools"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="skill-name">{{ skill.name }}</span>
+                            </div>
+                            {% endfor %}
                         </div>
                     </div>
                     {% endfor %}
+                </div>
+
+                <!-- Slider Navigation Controls -->
+                <div class="slider-controls">
+                    <button class="slider-arrow prev-btn" aria-label="Previous Category">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="slider-dots"></div>
+                    <button class="slider-arrow next-btn" aria-label="Next Category">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
             </div>
         </section>
@@ -400,6 +465,9 @@
         </footer>
     </div>
 
+    <!-- WebGL Background Engine Dependencies -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.fog.min.js"></script>
     <script>
         // Scroll Navbar Effect
         window.addEventListener('scroll', () => {
@@ -505,123 +573,198 @@
         });
 
 
-        // 3D Skills Wheel / Cylinder Auto-Scroll
+        // Horizontal Category Cards Autoplay Slider
         (function() {
-            const wheel = document.getElementById('skills-wheel');
-            let items = Array.from(wheel.querySelectorAll('.skills-wheel-item'));
-            if (items.length === 0) return;
+            const carousel = document.querySelector('.category-carousel');
+            if (!carousel) return;
 
-            // To make a smooth cylinder, we want at least 12 items
-            const minItems = 12;
-            while (items.length < minItems) {
-                items.forEach(item => {
-                    const clone = item.cloneNode(true);
-                    wheel.appendChild(clone);
-                });
-                items = Array.from(wheel.querySelectorAll('.skills-wheel-item'));
-            }
+            const track = carousel.querySelector('.category-track');
+            const cards = Array.from(carousel.querySelectorAll('.category-card'));
+            const prevBtn = carousel.querySelector('.prev-btn');
+            const nextBtn = carousel.querySelector('.next-btn');
+            const dotsContainer = carousel.querySelector('.slider-dots');
 
-            const N = items.length;
-            const angleBetween = 360 / N;
-            // Calculate cylinder radius dynamically
-            let itemHeight = items[0].offsetHeight || 80;
-            let R = (itemHeight / 2) / Math.tan(Math.PI / N);
+            if (!track || cards.length === 0) return;
 
-            function positionItems() {
-                itemHeight = items[0].offsetHeight || 80;
-                R = (itemHeight / 2) / Math.tan(Math.PI / N);
-                items.forEach((item, i) => {
-                    const angle = i * angleBetween;
-                    item.style.transform = `rotateX(${angle}deg) translateZ(${R}px)`;
-                });
-            }
+            let currentIndex = 0;
+            let autoplayInterval = null;
+            const autoplayDelay = 5000; // Autoplay slide interval: 5 seconds
 
-            positionItems();
-            window.addEventListener('resize', positionItems);
-
-            let currentAngle = 0;
-            let targetAngle = 0;
-            let isDragging = false;
-            let startY = 0;
-            let startAngle = 0;
-            let autoSpinSpeed = 0.15; // Speed of auto-rotation
-
-            // Animation Loop
-            function tick() {
-                if (!isDragging) {
-                    currentAngle += autoSpinSpeed;
-                } else {
-                    currentAngle += (targetAngle - currentAngle) * 0.1;
+            function renderDots() {
+                dotsContainer.innerHTML = '';
+                if (cards.length <= 1) {
+                    prevBtn.style.display = 'none';
+                    nextBtn.style.display = 'none';
+                    dotsContainer.style.display = 'none';
+                    return;
                 }
 
-                // Apply rotation to the wheel container
-                // Rotate slightly on the Y-axis (-18deg) to show the 3D cylindrical curve
-                wheel.style.transform = `rotateY(-18deg) rotateX(${-currentAngle}deg)`;
+                cards.forEach((_, i) => {
+                    const dot = document.createElement('button');
+                    dot.classList.add('slider-dot');
+                    if (i === currentIndex) dot.classList.add('active');
+                    dot.addEventListener('click', () => {
+                        goToSlide(i);
+                        resetAutoplay();
+                    });
+                    dotsContainer.appendChild(dot);
+                });
+            }
 
-                // Dynamic opacity and scaling based on position
-                items.forEach((item, i) => {
-                    const itemAngle = i * angleBetween;
-                    // Difference between current cylinder rotation and item position angle
-                    let diff = (itemAngle - currentAngle) % 360;
-                    if (diff < 0) diff += 360;
-                    if (diff > 180) diff -= 360;
+            function updateSlider() {
+                // Since each category card has width 100%, translation is simply 100% per index
+                track.style.transform = `translateX(${-currentIndex * 100}%)`;
 
-                    // diff is between -180 and 180 degrees.
-                    // Items in front have diff close to 0.
-                    const absDiff = Math.abs(diff);
-
-                    // Fade out items as they rotate to the back (absDiff close to 90-180)
-                    const opacity = Math.max(0, 1 - (absDiff / 90));
-                    
-                    // Scale up items slightly in the center front
-                    const scale = Math.max(0.8, 1.1 - (absDiff / 90) * 0.3);
-
-                    const content = item.querySelector('.skills-wheel-item-content');
-                    if (content) {
-                        content.style.opacity = opacity;
-                        content.style.transform = `scale(${scale})`;
-                    }
+                // Update dots active state
+                const dots = Array.from(dotsContainer.querySelectorAll('.slider-dot'));
+                dots.forEach((dot, i) => {
+                    dot.classList.toggle('active', i === currentIndex);
                 });
 
-                requestAnimationFrame(tick);
+                // Update arrows disabled state
+                if (prevBtn && nextBtn) {
+                    prevBtn.disabled = currentIndex === 0;
+                    nextBtn.disabled = currentIndex === cards.length - 1;
+                }
             }
 
-            // Drag / Touch Spin functionality
-            const container = wheel.parentElement;
+            function goToSlide(idx) {
+                currentIndex = idx;
+                updateSlider();
+            }
 
-            function startDrag(e) {
+            function nextSlide() {
+                if (currentIndex < cards.length - 1) {
+                    currentIndex++;
+                } else {
+                    currentIndex = 0; // Wrap around to first slide
+                }
+                updateSlider();
+            }
+
+            function prevSlide() {
+                if (currentIndex > 0) {
+                    currentIndex--;
+                    updateSlider();
+                }
+            }
+
+            // Autoplay Setup
+            function startAutoplay() {
+                if (cards.length <= 1) return;
+                autoplayInterval = setInterval(nextSlide, autoplayDelay);
+            }
+
+            function stopAutoplay() {
+                if (autoplayInterval) {
+                    clearInterval(autoplayInterval);
+                }
+            }
+
+            function resetAutoplay() {
+                stopAutoplay();
+                startAutoplay();
+            }
+
+            // Arrow button click listeners
+            if (prevBtn && nextBtn) {
+                prevBtn.addEventListener('click', () => {
+                    prevSlide();
+                    resetAutoplay();
+                });
+                nextBtn.addEventListener('click', () => {
+                    nextSlide();
+                    resetAutoplay();
+                });
+            }
+
+            // Swipe/Drag Functionality
+            let isDragging = false;
+            let startX = 0;
+            let currentTranslate = 0;
+            let prevTranslate = 0;
+
+            function getTranslateX() {
+                const style = window.getComputedStyle(track);
+                const transform = style.transform || style.webkitTransform;
+                if (!transform || transform === 'none') return 0;
+                const matrix = transform.match(/^matrix\((.+)\)$/);
+                if (matrix) {
+                    return parseFloat(matrix[1].split(',')[4]);
+                }
+                return 0;
+            }
+
+            track.addEventListener('mousedown', dragStart);
+            track.addEventListener('touchstart', dragStart, { passive: true });
+            track.addEventListener('mousemove', dragMove);
+            track.addEventListener('touchmove', dragMove, { passive: true });
+            track.addEventListener('mouseup', dragEnd);
+            track.addEventListener('touchend', dragEnd);
+            track.addEventListener('mouseleave', dragEnd);
+
+            function dragStart(e) {
+                stopAutoplay();
                 isDragging = true;
-                const clientY = e.touches ? e.touches[0].clientX : e.clientX;
-                startY = clientY;
-                startAngle = currentAngle;
-                container.style.cursor = 'grabbing';
+                startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                prevTranslate = getTranslateX();
+                track.style.transition = 'none';
+                track.style.cursor = 'grabbing';
             }
 
-            function drag(e) {
+            function dragMove(e) {
                 if (!isDragging) return;
-                const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-                const deltaY = clientY - startY;
-                // 1px of drag = 0.5 degrees of rotation
-                targetAngle = startAngle - (deltaY * 0.5);
-                currentAngle = targetAngle;
+                const currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+                const diffX = currentX - startX;
+                currentTranslate = prevTranslate + diffX;
+                track.style.transform = `translateX(${currentTranslate}px)`;
             }
 
-            function stopDrag() {
+            function dragEnd(e) {
+                if (!isDragging) return;
                 isDragging = false;
-                container.style.cursor = 'grab';
+                track.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
+                track.style.cursor = 'grab';
+
+                const sliderWidth = carousel.offsetWidth;
+                const dragAmount = currentTranslate - prevTranslate;
+
+                // If dragged more than 20% of width, change slide index
+                if (dragAmount < -sliderWidth * 0.2 && currentIndex < cards.length - 1) {
+                    currentIndex++;
+                } else if (dragAmount > sliderWidth * 0.2 && currentIndex > 0) {
+                    currentIndex--;
+                }
+
+                updateSlider();
+                startAutoplay();
             }
 
-            container.addEventListener('mousedown', startDrag);
-            window.addEventListener('mousemove', drag);
-            window.addEventListener('mouseup', stopDrag);
-
-            container.addEventListener('touchstart', startDrag, { passive: true });
-            window.addEventListener('touchmove', drag, { passive: true });
-            window.addEventListener('touchend', stopDrag);
-
-            tick();
+            // Init
+            renderDots();
+            updateSlider();
+            startAutoplay();
         })();
 
+
+        // Initialize Vanta Fog Background Effect
+        window.addEventListener('DOMContentLoaded', () => {
+            VANTA.FOG({
+                el: "#vanta-bg",
+                mouseControls: true,
+                touchControls: true,
+                gyroControls: false,
+                minHeight: 200.00,
+                minWidth: 200.00,
+                highlightColor: 0x00f2fe,
+                midtoneColor: 0xf093fb,
+                lowlightColor: 0x4facfe,
+                baseColor: 0x060614,
+                blurFactor: 0.60,
+                speed: 1.50,
+                zoom: 1.00
+            });
+        });
 
         // Final Fix: Force browser to calculate sticky/reveal states on load
         window.addEventListener('load', () => {
