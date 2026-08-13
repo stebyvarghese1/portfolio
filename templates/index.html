@@ -2,6 +2,7 @@
 <html lang="en">
 
 <head>
+    <script>document.documentElement.classList.add('js-enabled');</script>
     <!-- Basic -->
     <meta charset="UTF-8">
     <meta
@@ -521,8 +522,7 @@
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('active');
-                } else {
-                    entry.target.classList.remove('active');
+                    observer.unobserve(entry.target);
                 }
             });
         }, observerOptions);
