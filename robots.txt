@@ -4,4 +4,3 @@ Disallow: /admin
 Disallow: /login
 
 Sitemap: https://www.stebyvarghese.in/sitemap.xml
-Favicon: https://stebyvarghese.in/favicon.png
