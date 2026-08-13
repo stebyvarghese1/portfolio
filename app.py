@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from dotenv import load_dotenv
+import bleach
 
 load_dotenv()
 
@@ -62,6 +63,26 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
+# HTML Sanitization configuration for profile highlights
+ALLOWED_TAGS = ['span', 'strong', 'em', 'a', 'br', 'p', 'b', 'i']
+ALLOWED_ATTRIBUTES = {
+    'span': ['class', 'style'],
+    'a': ['href', 'title', 'target', 'style'],
+    '*': ['style']
+}
+ALLOWED_STYLES = ['color', 'font-weight', 'font-size', 'margin-bottom', 'text-align']
+
+def sanitize_html(text):
+    if not text:
+        return text
+    return bleach.clean(
+        text.strip(),
+        tags=ALLOWED_TAGS,
+        attributes=ALLOWED_ATTRIBUTES,
+        styles=ALLOWED_STYLES,
+        strip=True
+    )
+
 # Models
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -82,6 +103,7 @@ class Skill(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(50), nullable=False)
     category = db.Column(db.String(50)) # e.g., Programming, Frameworks
+    logo_url = db.Column(db.Text)
 
 class Education(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -104,6 +126,13 @@ class Profile(db.Model):
     about_image_url = db.Column(db.Text)
     name = db.Column(db.String(100))
     tagline = db.Column(db.String(500))
+    about_intro = db.Column(db.Text)
+    about_text = db.Column(db.Text)
+    greeting = db.Column(db.String(100))
+    stat_1_value = db.Column(db.String(50))
+    stat_1_label = db.Column(db.String(100))
+    stat_2_value = db.Column(db.String(50))
+    stat_2_label = db.Column(db.String(100))
 
 # Routes
 @app.route('/')
@@ -113,7 +142,12 @@ def index():
     education = Education.query.all()
     certificates = Certificate.query.all()
     profile = Profile.query.first()
-    return render_template('index.html', projects=projects, skills=skills, education=education, certificates=certificates, profile=profile)
+    
+    # Get sorted list of distinct skill categories
+    categories = [c[0] for c in db.session.query(Skill.category).distinct().all() if c[0]]
+    categories = sorted(categories)
+    
+    return render_template('index.html', projects=projects, skills=skills, education=education, certificates=certificates, profile=profile, categories=categories)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -137,7 +171,14 @@ def admin():
     certificates = Certificate.query.all()
     profile = Profile.query.first()
     current_admin = User.query.get(session['user_id'])
-    return render_template('admin.html', projects=projects, skills=skills, education=education, certificates=certificates, profile=profile, current_admin=current_admin)
+    
+    # Get unique categories from skills in database
+    categories = [c[0] for c in db.session.query(Skill.category).distinct().all() if c[0]]
+    if not categories:
+        categories = ['Programming', 'Frameworks', 'Tools']
+    categories = sorted(categories)
+        
+    return render_template('admin.html', projects=projects, skills=skills, education=education, certificates=certificates, profile=profile, current_admin=current_admin, categories=categories)
 
 @app.route('/admin/profile/update', methods=['POST'])
 def update_profile():
@@ -149,6 +190,42 @@ def update_profile():
     
     profile.photo_url = request.form.get('photo_url')
     profile.about_image_url = request.form.get('about_image_url')
+    
+    name = request.form.get('name')
+    if name:
+        profile.name = name.strip()
+        
+    tagline = request.form.get('tagline')
+    if tagline:
+        profile.tagline = sanitize_html(tagline)
+        
+    about_intro = request.form.get('about_intro')
+    if about_intro:
+        profile.about_intro = sanitize_html(about_intro)
+        
+    about_text = request.form.get('about_text')
+    if about_text:
+        profile.about_text = sanitize_html(about_text)
+        
+    greeting = request.form.get('greeting')
+    if greeting:
+        profile.greeting = greeting.strip()
+        
+    stat_1_value = request.form.get('stat_1_value')
+    if stat_1_value:
+        profile.stat_1_value = stat_1_value.strip()
+        
+    stat_1_label = request.form.get('stat_1_label')
+    if stat_1_label:
+        profile.stat_1_label = stat_1_label.strip()
+        
+    stat_2_value = request.form.get('stat_2_value')
+    if stat_2_value:
+        profile.stat_2_value = stat_2_value.strip()
+        
+    stat_2_label = request.form.get('stat_2_label')
+    if stat_2_label:
+        profile.stat_2_label = stat_2_label.strip()
     
     db.session.commit()
     flash('Profile updated successfully')
@@ -220,8 +297,17 @@ def add_skill():
     if 'user_id' not in session: return redirect(url_for('login'))
     name = request.form.get('name')
     category = request.form.get('category')
+    logo_url = request.form.get('logo_url')
+    if category == '__new__':
+        category = request.form.get('new_category')
+    
     if name:
-        new_skill = Skill(name=name, category=category)
+        name = name.strip()
+        if category:
+            category = category.strip()
+        if logo_url:
+            logo_url = logo_url.strip()
+        new_skill = Skill(name=name, category=category, logo_url=logo_url)
         db.session.add(new_skill)
         db.session.commit()
     return redirect(url_for('admin'))
@@ -380,15 +466,101 @@ if __name__ == '__main__':
         except Exception as e:
             db.session.rollback()
             
-        # Ensure at least one Profile record exists
-        if not Profile.query.first():
-            db.session.add(Profile(
+        try:
+            db.session.execute(db.text('ALTER TABLE skill ADD COLUMN logo_url TEXT'))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE profile ADD COLUMN about_intro TEXT'))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE profile ADD COLUMN about_text TEXT'))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE profile ADD COLUMN greeting TEXT'))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE profile ADD COLUMN stat_1_value TEXT'))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE profile ADD COLUMN stat_1_label TEXT'))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE profile ADD COLUMN stat_2_value TEXT'))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
+        try:
+            db.session.execute(db.text('ALTER TABLE profile ADD COLUMN stat_2_label TEXT'))
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
+        # Ensure at least one Profile record exists and contains all initial values
+        profile = Profile.query.first()
+        if not profile:
+            profile = Profile(
                 photo_url='/static/img/favicon_icon_1766679969783.png',
                 about_image_url='/static/img/favicon_icon_1766679969783.png',
                 name='STEBY VARGHESE',
-                tagline='Aspiring Agentic AI Developer & MCA Candidate'
-            ))
+                tagline='Aspiring <span style="color: var(--primary);">Agentic AI Developer</span> & MCA Candidate. Crafting the future of web through AI Prompts.',
+                greeting="Hello, I'm",
+                about_intro='Hello! I\'m <span class="text-gradient" style="font-weight: 700;">Steby Varghese</span>, a passionate developer based in India. Currently pursuing my MCA, I thrive at the intersection of design and functionality.',
+                about_text='My journey in tech is driven by a deep curiosity for how things work and a desire to build tools that solve real-world problems. From computer vision to agentic AI, I\'m always looking for the next challenge.',
+                stat_1_value='3+',
+                stat_1_label='Years project Experience',
+                stat_2_value='6+',
+                stat_2_label='Projects Completed'
+            )
+            db.session.add(profile)
             db.session.commit()
+        else:
+            # Upgrade existing profile to have the defaults if they are currently NULL
+            updated = False
+            if not profile.greeting:
+                profile.greeting = "Hello, I'm"
+                updated = True
+            if not profile.tagline:
+                profile.tagline = 'Aspiring <span style="color: var(--primary);">Agentic AI Developer</span> & MCA Candidate. Crafting the future of web through AI Prompts.'
+                updated = True
+            if not profile.about_intro:
+                profile.about_intro = 'Hello! I\'m <span class="text-gradient" style="font-weight: 700;">Steby Varghese</span>, a passionate developer based in India. Currently pursuing my MCA, I thrive at the intersection of design and functionality.'
+                updated = True
+            if not profile.about_text:
+                profile.about_text = 'My journey in tech is driven by a deep curiosity for how things work and a desire to build tools that solve real-world problems. From computer vision to agentic AI, I\'m always looking for the next challenge.'
+                updated = True
+            if not profile.stat_1_value:
+                profile.stat_1_value = '3+'
+                updated = True
+            if not profile.stat_1_label:
+                profile.stat_1_label = 'Years project Experience'
+                updated = True
+            if not profile.stat_2_value:
+                profile.stat_2_value = '6+'
+                updated = True
+            if not profile.stat_2_label:
+                profile.stat_2_label = 'Projects Completed'
+                updated = True
+            if updated:
+                db.session.commit()
 
         # Create default admin if no users exist at all
         if not User.query.first():
