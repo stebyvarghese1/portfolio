@@ -108,7 +108,7 @@
 </head>
 
 <body>
-    <div class="gradient-bg" id="vanta-bg">
+    <div class="gradient-bg">
         <div class="stars-3d-container">
             <div class="stars-layer stars-layer-1"></div>
             <div class="stars-layer stars-layer-2"></div>
@@ -465,9 +465,6 @@
         </footer>
     </div>
 
-    <!-- WebGL Background Engine Dependencies -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vanta@0.5.24/dist/vanta.fog.min.js"></script>
     <script>
         // Scroll Navbar Effect
         window.addEventListener('scroll', () => {
@@ -746,27 +743,6 @@
             startAutoplay();
         })();
 
-
-        // Initialize Vanta Fog Background Effect
-        window.addEventListener('DOMContentLoaded', () => {
-            VANTA.FOG({
-                el: "#vanta-bg",
-                mouseControls: true,
-                touchControls: false, // Disable touch controls to prevent page scroll conflicts on mobile
-                gyroControls: false,
-                minHeight: 200.00,
-                minWidth: 200.00,
-                highlightColor: 0x00f2fe,
-                midtoneColor: 0xf093fb,
-                lowlightColor: 0x4facfe,
-                baseColor: 0x060614,
-                blurFactor: 0.60,
-                speed: 1.00, // Reduced speed for smoother render updates
-                zoom: 1.00,
-                scale: 1.00,
-                scaleMobile: 2.00 // Downsample WebGL resolution on mobile (reduces GPU load by 75% with no visible difference on fog)
-            });
-        });
 
         // Final Fix: Force browser to calculate sticky/reveal states on load
         window.addEventListener('load', () => {
