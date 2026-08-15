@@ -11,8 +11,7 @@ app = Flask(__name__)
 
 @app.route('/favicon.ico')
 def favicon():
-    return send_from_directory(os.path.join(app.root_path, 'static', 'img'),
-                               'favicon_icon_1766679969783.png', mimetype='image/png')
+    return send_from_directory(app.root_path, 'favicon-96x96.png', mimetype='image/png')
 
 @app.route('/favicon.png')
 @app.route('/favicon-192x192.png')
@@ -75,13 +74,26 @@ ALLOWED_STYLES = ['color', 'font-weight', 'font-size', 'margin-bottom', 'text-al
 def sanitize_html(text):
     if not text:
         return text
-    return bleach.clean(
-        text.strip(),
-        tags=ALLOWED_TAGS,
-        attributes=ALLOWED_ATTRIBUTES,
-        styles=ALLOWED_STYLES,
-        strip=True
-    )
+    try:
+        # bleach 6.x: use CSSSanitizer for style allowlisting
+        from bleach.css_sanitizer import CSSSanitizer
+        css_sanitizer = CSSSanitizer(allowed_css_properties=ALLOWED_STYLES)
+        return bleach.clean(
+            text.strip(),
+            tags=ALLOWED_TAGS,
+            attributes=ALLOWED_ATTRIBUTES,
+            css_sanitizer=css_sanitizer,
+            strip=True
+        )
+    except ImportError:
+        # bleach < 6.x: fallback to legacy styles parameter
+        return bleach.clean(
+            text.strip(),
+            tags=ALLOWED_TAGS,
+            attributes=ALLOWED_ATTRIBUTES,
+            styles=ALLOWED_STYLES,
+            strip=True
+        )
 
 # Models
 class User(db.Model):
