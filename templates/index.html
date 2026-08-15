@@ -348,13 +348,7 @@
 
                 <!-- Slider Navigation Controls -->
                 <div class="slider-controls">
-                    <button class="slider-arrow prev-btn" aria-label="Previous Category">
-                        <i class="fas fa-chevron-left"></i>
-                    </button>
                     <div class="slider-dots"></div>
-                    <button class="slider-arrow next-btn" aria-label="Next Category">
-                        <i class="fas fa-chevron-right"></i>
-                    </button>
                 </div>
             </div>
         </section>
@@ -479,9 +473,20 @@
             let current = "";
             const sections = document.querySelectorAll("section");
             sections.forEach((section) => {
-                const sectionTop = section.offsetTop;
+                const id = section.getAttribute("id");
+                let sectionTop;
+                // #skills is wrapped in a tall sticky wrapper; use getBoundingClientRect
+                // so the active state matches the visible sticky position, not wrapper top
+                if (id === 'skills') {
+                    const wrapper = document.getElementById('skills-scroll-wrapper');
+                    sectionTop = wrapper
+                        ? wrapper.offsetTop
+                        : section.offsetTop;
+                } else {
+                    sectionTop = section.offsetTop;
+                }
                 if (pageYOffset >= sectionTop - 100) {
-                    current = section.getAttribute("id");
+                    current = id;
                 }
             });
 
@@ -509,6 +514,17 @@
                 mobileToggle.classList.remove('active');
                 navLinks.classList.remove('active');
                 document.body.style.overflow = 'initial';
+            });
+        });
+
+        // Skills nav link: scroll to the exact position where the section sticks
+        // (wrapper.offsetTop + 420px = the sticky snap point for top: -420px)
+        document.querySelectorAll('a[href="#skills"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const wrapper = document.getElementById('skills-scroll-wrapper');
+                const targetY = wrapper ? wrapper.offsetTop + 420 : document.getElementById('skills').offsetTop;
+                window.scrollTo({ top: targetY, behavior: 'smooth' });
             });
         });
 
@@ -573,177 +589,151 @@
         });
 
 
-        // Horizontal Category Cards Autoplay Slider
+        // Sticky Scroll-Lock Category Cards Slider
         (function() {
             const carousel = document.querySelector('.category-carousel');
             if (!carousel) return;
 
+            const skillsSection = document.getElementById('skills');
             const track = carousel.querySelector('.category-track');
             const cards = Array.from(carousel.querySelectorAll('.category-card'));
-            const prevBtn = carousel.querySelector('.prev-btn');
-            const nextBtn = carousel.querySelector('.next-btn');
             const dotsContainer = carousel.querySelector('.slider-dots');
 
             if (!track || cards.length === 0) return;
 
             let currentIndex = 0;
-            let autoplayInterval = null;
-            const autoplayDelay = 5000; // Autoplay slide interval: 5 seconds
 
+            // ── Dots ────────────────────────────────────────────────────────
             function renderDots() {
                 dotsContainer.innerHTML = '';
                 if (cards.length <= 1) {
-                    prevBtn.style.display = 'none';
-                    nextBtn.style.display = 'none';
                     dotsContainer.style.display = 'none';
                     return;
                 }
-
                 cards.forEach((_, i) => {
                     const dot = document.createElement('button');
                     dot.classList.add('slider-dot');
                     if (i === currentIndex) dot.classList.add('active');
-                    dot.addEventListener('click', () => {
-                        goToSlide(i);
-                        resetAutoplay();
-                    });
+                    dot.addEventListener('click', () => goToSlide(i));
                     dotsContainer.appendChild(dot);
                 });
             }
 
+            // ── Slider state ─────────────────────────────────────────────────
             function updateSlider() {
-                // Since each category card has width 100%, translation is simply 100% per index
                 track.style.transform = `translate3d(${-currentIndex * 100}%, 0, 0)`;
-
-                // Update dots active state
-                const dots = Array.from(dotsContainer.querySelectorAll('.slider-dot'));
-                dots.forEach((dot, i) => {
-                    dot.classList.toggle('active', i === currentIndex);
-                });
-
-                // Update arrows disabled state
-                if (prevBtn && nextBtn) {
-                    prevBtn.disabled = currentIndex === 0;
-                    nextBtn.disabled = currentIndex === cards.length - 1;
-                }
+                Array.from(dotsContainer.querySelectorAll('.slider-dot'))
+                    .forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
             }
 
             function goToSlide(idx) {
-                currentIndex = idx;
+                currentIndex = Math.max(0, Math.min(idx, cards.length - 1));
                 updateSlider();
             }
 
-            function nextSlide() {
-                if (currentIndex < cards.length - 1) {
-                    currentIndex++;
-                } else {
-                    currentIndex = 0; // Wrap around to first slide
-                }
-                updateSlider();
-            }
-
-            function prevSlide() {
-                if (currentIndex > 0) {
-                    currentIndex--;
-                    updateSlider();
-                }
-            }
-
-            // Autoplay Setup
-            function startAutoplay() {
-                if (cards.length <= 1) return;
-                autoplayInterval = setInterval(nextSlide, autoplayDelay);
-            }
-
-            function stopAutoplay() {
-                if (autoplayInterval) {
-                    clearInterval(autoplayInterval);
-                }
-            }
-
-            function resetAutoplay() {
-                stopAutoplay();
-                startAutoplay();
-            }
-
-            // Arrow button click listeners
-            if (prevBtn && nextBtn) {
-                prevBtn.addEventListener('click', () => {
-                    prevSlide();
-                    resetAutoplay();
-                });
-                nextBtn.addEventListener('click', () => {
-                    nextSlide();
-                    resetAutoplay();
-                });
-            }
-
-            // Swipe/Drag Functionality
-            let isDragging = false;
-            let startX = 0;
-            let currentTranslate = 0;
-            let prevTranslate = 0;
+            // ── Swipe / Drag ──────────────────────────────────────────────────
+            let isDragging = false, startX = 0, currentTranslate = 0, prevTranslate = 0;
 
             function getTranslateX() {
-                const style = window.getComputedStyle(track);
-                const transform = style.transform || style.webkitTransform;
-                if (!transform || transform === 'none') return 0;
-                const matrix = transform.match(/^matrix\((.+)\)$/);
-                if (matrix) {
-                    return parseFloat(matrix[1].split(',')[4]);
-                }
-                return 0;
+                const t = window.getComputedStyle(track).transform;
+                if (!t || t === 'none') return 0;
+                const m = t.match(/^matrix\((.+)\)$/);
+                return m ? parseFloat(m[1].split(',')[4]) : 0;
             }
 
-            track.addEventListener('mousedown', dragStart);
-            track.addEventListener('touchstart', dragStart, { passive: true });
-            track.addEventListener('mousemove', dragMove);
-            track.addEventListener('touchmove', dragMove, { passive: true });
-            track.addEventListener('mouseup', dragEnd);
-            track.addEventListener('touchend', dragEnd);
-            track.addEventListener('mouseleave', dragEnd);
-
-            function dragStart(e) {
-                stopAutoplay();
-                isDragging = true;
-                startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+            track.addEventListener('mousedown', e => {
+                isDragging = true; startX = e.clientX;
                 prevTranslate = getTranslateX();
-                track.style.transition = 'none';
-                track.style.cursor = 'grabbing';
-            }
-
-            function dragMove(e) {
+                track.style.transition = 'none'; track.style.cursor = 'grabbing';
+            });
+            track.addEventListener('touchstart', e => {
+                isDragging = true; startX = e.touches[0].clientX;
+                prevTranslate = getTranslateX(); track.style.transition = 'none';
+            }, { passive: true });
+            track.addEventListener('mousemove', e => {
                 if (!isDragging) return;
-                const currentX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-                const diffX = currentX - startX;
-                currentTranslate = prevTranslate + diffX;
+                currentTranslate = prevTranslate + (e.clientX - startX);
                 track.style.transform = `translate3d(${currentTranslate}px, 0, 0)`;
-            }
-
-            function dragEnd(e) {
+            });
+            track.addEventListener('touchmove', e => {
+                if (!isDragging) return;
+                currentTranslate = prevTranslate + (e.touches[0].clientX - startX);
+                track.style.transform = `translate3d(${currentTranslate}px, 0, 0)`;
+            }, { passive: true });
+            function onDragEnd() {
                 if (!isDragging) return;
                 isDragging = false;
                 track.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
                 track.style.cursor = 'grab';
-
-                const sliderWidth = carousel.offsetWidth;
-                const dragAmount = currentTranslate - prevTranslate;
-
-                // If dragged more than 20% of width, change slide index
-                if (dragAmount < -sliderWidth * 0.2 && currentIndex < cards.length - 1) {
-                    currentIndex++;
-                } else if (dragAmount > sliderWidth * 0.2 && currentIndex > 0) {
-                    currentIndex--;
-                }
-
-                updateSlider();
-                startAutoplay();
+                const diff = currentTranslate - prevTranslate;
+                const threshold = carousel.offsetWidth * 0.2;
+                if (diff < -threshold)      goToSlide(currentIndex + 1);
+                else if (diff > threshold)  goToSlide(currentIndex - 1);
+                else                        updateSlider();
             }
+            track.addEventListener('mouseup', onDragEnd);
+            track.addEventListener('touchend', onDragEnd);
+            track.addEventListener('mouseleave', onDragEnd);
 
-            // Init
+            // ── Sticky Scroll-Lock Setup ──────────────────────────────────────
+            // A tall wrapper is injected around #skills. The section becomes
+            // position:sticky so it pins at top:0 while the wrapper scrolls past.
+            // Each slide gets scrollPerSlide px of scroll to advance.
+            // When all slides are shown the wrapper ends and normal scroll resumes.
+            const scrollPerSlide = window.innerHeight * 0.4;
+            const extraHeight = (cards.length - 1) * scrollPerSlide;
+
+            const wrapper = document.createElement('div');
+            wrapper.id = 'skills-scroll-wrapper';
+            wrapper.style.position = 'relative';
+
+            skillsSection.parentNode.insertBefore(wrapper, skillsSection);
+            wrapper.appendChild(skillsSection);
+
+            function sizeWrapper() {
+                wrapper.style.height = (skillsSection.offsetHeight + extraHeight) + 'px';
+            }
+            sizeWrapper();
+            window.addEventListener('resize', sizeWrapper);
+
+            // Make section sticky inside the wrapper.
+            // #skills has 500px padding-top in CSS (to clear the projects stack negative margin).
+            // Set top = -(padding - navbar height) so the visible content aligns at ~80px from top,
+            // matching the same behaviour as #projects .section-head (top: 80px).
+            skillsSection.style.position = 'sticky';
+            skillsSection.style.top = '-420px'; // -(500px padding - 80px navbar)
+
+
+            // ── Scroll handler ────────────────────────────────────────────────
+            // stickyTopOffset = absolute value of skillsSection.style.top (-420px).
+            // The wrapper scrolls this many px BEFORE the section actually sticks.
+            // We subtract it so progress/slides only advance once the section is pinned.
+            const stickyTopOffset = 420;
+            let ticking = false;
+            window.addEventListener('scroll', () => {
+                if (ticking) return;
+                ticking = true;
+                requestAnimationFrame(() => {
+                    // Raw scroll distance of wrapper above viewport top
+                    const scrolledIn = -wrapper.getBoundingClientRect().top;
+                    // Only count scroll that happens AFTER the section has stuck
+                    const adjustedScrolledIn = Math.max(0, scrolledIn - stickyTopOffset);
+                    // Slide budget = extra height added to wrapper for slide transitions
+                    const progress = Math.max(0, Math.min(1, adjustedScrolledIn / extraHeight));
+
+                    // Map progress to slide index
+                    const target = Math.min(
+                        Math.floor(progress * cards.length),
+                        cards.length - 1
+                    );
+                    if (target !== currentIndex) goToSlide(target);
+                    ticking = false;
+                });
+            }, { passive: true });
+
+            // ── Init ──────────────────────────────────────────────────────────
             renderDots();
             updateSlider();
-            startAutoplay();
         })();
 
 
