@@ -131,6 +131,7 @@ class Certificate(db.Model):
     date_earned = db.Column(db.String(50))
     credential_link = db.Column(db.Text)
     logo_url = db.Column(db.Text)
+    order = db.Column(db.Integer, default=0)
 
 class Profile(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -152,7 +153,7 @@ def index():
     projects = Project.query.order_by(Project.order.asc()).all()
     skills = Skill.query.all()
     education = Education.query.all()
-    certificates = Certificate.query.all()
+    certificates = Certificate.query.order_by(Certificate.order.asc()).all()
     profile = Profile.query.first()
     
     # Get sorted list of distinct skill categories
@@ -180,7 +181,7 @@ def admin():
     projects = Project.query.order_by(Project.order.asc()).all()
     skills = Skill.query.all()
     education = Education.query.all()
-    certificates = Certificate.query.all()
+    certificates = Certificate.query.order_by(Certificate.order.asc()).all()
     profile = Profile.query.first()
     current_admin = User.query.get(session['user_id'])
     
@@ -290,8 +291,17 @@ def edit_project(id):
 def move_project(id, direction):
     if 'user_id' not in session: return redirect(url_for('login'))
     project = Project.query.get(id)
-    if not project: return redirect(url_for('admin'))
+    if not project: return redirect(url_for('admin', _anchor='projects'))
     
+    # Ensure all projects have sequential order if any order is 0, None, or duplicated
+    all_projects = Project.query.order_by(Project.order.asc(), Project.id.asc()).all()
+    orders = [p.order for p in all_projects]
+    if any(o is None or o == 0 for o in orders) or len(orders) != len(set(orders)):
+        for idx, p in enumerate(all_projects):
+            p.order = idx + 1
+        db.session.commit()
+        project = Project.query.get(id)
+
     # Simple swap logic
     if direction == 'up':
         other = Project.query.filter(Project.order < project.order).order_by(Project.order.desc()).first()
@@ -302,7 +312,7 @@ def move_project(id, direction):
         project.order, other.order = other.order, project.order
         db.session.commit()
         
-    return redirect(url_for('admin'))
+    return redirect(url_for('admin', _anchor='projects'))
 
 @app.route('/admin/skill/add', methods=['POST'])
 def add_skill():
@@ -364,16 +374,19 @@ def add_certificate():
     credential_link = request.form.get('credential_link')
     logo_url = request.form.get('logo_url')
     if title and issuer:
+        max_order = db.session.query(db.func.max(Certificate.order)).scalar()
+        next_order = (max_order or 0) + 1
         new_cert = Certificate(
             title=title,
             issuer=issuer,
             date_earned=date_earned,
             credential_link=credential_link,
-            logo_url=logo_url
+            logo_url=logo_url,
+            order=next_order
         )
         db.session.add(new_cert)
         db.session.commit()
-    return redirect(url_for('admin'))
+    return redirect(url_for('admin', _anchor='certificates'))
 
 @app.route('/admin/certificate/delete/<int:id>')
 def delete_certificate(id):
@@ -382,7 +395,47 @@ def delete_certificate(id):
     if cert:
         db.session.delete(cert)
         db.session.commit()
-    return redirect(url_for('admin'))
+    return redirect(url_for('admin', _anchor='certificates'))
+
+@app.route('/admin/certificate/edit/<int:id>', methods=['POST'])
+def edit_certificate(id):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    cert = Certificate.query.get(id)
+    if cert:
+        cert.title = request.form.get('title')
+        cert.issuer = request.form.get('issuer')
+        cert.date_earned = request.form.get('date_earned')
+        cert.credential_link = request.form.get('credential_link')
+        cert.logo_url = request.form.get('logo_url')
+        db.session.commit()
+    return redirect(url_for('admin', _anchor='certificates'))
+
+@app.route('/admin/certificate/move/<int:id>/<direction>')
+def move_certificate(id, direction):
+    if 'user_id' not in session: return redirect(url_for('login'))
+    cert = Certificate.query.get(id)
+    if not cert: return redirect(url_for('admin', _anchor='certificates'))
+    
+    # Ensure all certificates have sequential order if any order is 0, None, or duplicated
+    all_certs = Certificate.query.order_by(Certificate.order.asc(), Certificate.id.asc()).all()
+    orders = [c.order for c in all_certs]
+    if any(o is None or o == 0 for o in orders) or len(orders) != len(set(orders)):
+        for idx, c in enumerate(all_certs):
+            c.order = idx + 1
+        db.session.commit()
+        cert = Certificate.query.get(id)
+
+    # Simple swap logic
+    if direction == 'up':
+        other = Certificate.query.filter(Certificate.order < cert.order).order_by(Certificate.order.desc()).first()
+    else:
+        other = Certificate.query.filter(Certificate.order > cert.order).order_by(Certificate.order.asc()).first()
+        
+    if other:
+        cert.order, other.order = other.order, cert.order
+        db.session.commit()
+        
+    return redirect(url_for('admin', _anchor='certificates'))
 
 @app.route('/admin/credentials/update', methods=['POST'])
 def update_credentials():
@@ -471,10 +524,33 @@ if __name__ == '__main__':
                     issuer VARCHAR(100) NOT NULL,
                     date_earned VARCHAR(50),
                     credential_link TEXT,
-                    logo_url TEXT
+                    logo_url TEXT,
+                    "order" INTEGER DEFAULT 0
                 )
             '''))
             db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
+        try:
+            # Need quotes around order because it's a SQL keyword
+            db.session.execute(db.text('ALTER TABLE certificate ADD COLUMN "order" INTEGER DEFAULT 0'))
+            db.session.commit()
+            
+            # Reorder existing if they have order 0
+            existing_certs = Certificate.query.all()
+            for idx, c in enumerate(existing_certs):
+                c.order = idx + 1
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            
+        try:
+            unassigned_certs = Certificate.query.filter((Certificate.order == None) | (Certificate.order == 0)).all()
+            if unassigned_certs:
+                for idx, c in enumerate(Certificate.query.order_by(Certificate.id.asc()).all()):
+                    c.order = idx + 1
+                db.session.commit()
         except Exception as e:
             db.session.rollback()
             
@@ -594,14 +670,16 @@ if __name__ == '__main__':
                 issuer='Coursera / Google',
                 date_earned='Aug 2024',
                 credential_link='https://coursera.org/verify/professional-cert/google-cybersecurity',
-                logo_url='https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=800'
+                logo_url='https://images.unsplash.com/photo-1560179707-f14e90ef3623?auto=format&fit=crop&q=80&w=800',
+                order=1
             ))
             db.session.add(Certificate(
                 title='Certified Ethical Hacker (CEH) Course',
                 issuer='EC-Council',
                 date_earned='June 2024',
                 credential_link='#',
-                logo_url=''
+                logo_url='',
+                order=2
             ))
             
         # Skills
