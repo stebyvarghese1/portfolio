@@ -485,6 +485,17 @@
                     </form>
                 </div>
 
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 1.2rem 0;">
+                    <h3 style="margin: 0;"><i class="fas fa-list" style="color: var(--primary);"></i> Current Certificates</h3>
+                    <span style="color: var(--text-dim); font-size: 0.85rem;"><i class="fas fa-arrows-alt-v"></i> Use arrows to reorder</span>
+                </div>
+
+                {% if not certificates %}
+                <div class="glass-card" style="text-align: center; padding: 2rem; color: var(--text-dim); margin-bottom: 2rem;">
+                    <p style="margin: 0;"><i class="fas fa-info-circle"></i> No certificates added yet.</p>
+                </div>
+                {% endif %}
+
                 {% for cert in certificates %}
                 <div class="glass-card admin-flex-between" style="margin-bottom: 1.5rem; align-items: center;">
                     <div style="display: flex; gap: 1.5rem; align-items: center;">
@@ -501,7 +512,23 @@
                             <p style="font-size: 0.8rem; opacity: 0.6;">{{ cert.date_earned }}</p>
                         </div>
                     </div>
-                    <div style="display: flex; gap: 1rem; align-items: center;">
+                    <div style="display: flex; gap: 0.8rem; align-items: center;">
+                        <a href="{{ url_for('move_certificate', id=cert.id, direction='up') }}"
+                            title="Move Up" style="color: var(--primary);"><i
+                                class="fas fa-chevron-up"></i></a>
+                        <a href="{{ url_for('move_certificate', id=cert.id, direction='down') }}"
+                            title="Move Down" style="color: var(--primary);"><i
+                                class="fas fa-chevron-down"></i></a>
+
+                        <button class="edit-cert-btn" data-id="{{ cert.id }}"
+                            data-title="{{ cert.title }}" data-issuer="{{ cert.issuer }}"
+                            data-date="{{ cert.date_earned if cert.date_earned else '' }}"
+                            data-link="{{ cert.credential_link if cert.credential_link else '' }}"
+                            data-logo="{{ cert.logo_url if cert.logo_url else '' }}"
+                            title="Edit Certificate"
+                            style="background: none; border: none; cursor: pointer; color: var(--accent); font-size: 1rem; padding: 0;"><i
+                                class="fas fa-edit"></i></button>
+
                         <a href="{{ cert.credential_link if cert.credential_link else '#' }}" target="_blank" class="btn btn-primary" 
                            {% if not cert.credential_link or cert.credential_link == '#' %}
                            style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px; font-weight: 600; pointer-events: none; opacity: 0.5;"
@@ -512,13 +539,55 @@
                             <span>Verify</span>
                             <i class="fas fa-external-link-alt" style="font-size: 0.75rem;"></i>
                         </a>
-                        <a href="{{ url_for('delete_certificate', id=cert.id) }}" style="color: #ff4d4d;"
-                            onclick="return confirm('Delete certificate entry?')">
-                            <i class="fas fa-trash"></i>
+                        <a href="{{ url_for('delete_certificate', id=cert.id) }}" style="color: #ff4d4d; text-decoration: none;"
+                            onclick="return confirm('Delete certificate entry?')" title="Delete">
+                            <i class="fas fa-trash-alt"></i>
                         </a>
                     </div>
                 </div>
                 {% endfor %}
+
+                <!-- Edit Certificate Modal -->
+                <div id="editCertModal" class="glass-card"
+                    style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; width: 95%; max-width: 700px; max-height: 90vh; overflow-y: auto; background: rgba(5, 5, 20, 0.98); box-shadow: 0 0 100px rgba(0, 0, 0, 0.9); border: 1px solid var(--primary);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h3><i class="fas fa-edit" style="color: var(--accent);"></i> Edit Certificate</h3>
+                        <button type="button" onclick="document.getElementById('editCertModal').style.display='none'"
+                            style="background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.5rem;"><i
+                                class="fas fa-times"></i></button>
+                    </div>
+                    <form id="editCertForm" action="" method="POST">
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Certificate Title</label>
+                                <input type="text" name="title" id="edit-cert-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Issuing Organization</label>
+                                <input type="text" name="issuer" id="edit-cert-issuer" required>
+                            </div>
+                        </div>
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Date Earned</label>
+                                <input type="text" name="date_earned" id="edit-cert-date">
+                            </div>
+                            <div class="form-group">
+                                <label>Credential URL</label>
+                                <input type="text" name="credential_link" id="edit-cert-link">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Certificate Image URL (Optional)</label>
+                            <input type="text" name="logo_url" id="edit-cert-logo">
+                        </div>
+                        <button type="submit" class="btn btn-primary"
+                            style="margin-top: 1rem; width: 100%; justify-content: center;">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
             </section>
 
             <!-- Credentials Management -->
@@ -624,6 +693,26 @@
             });
         });
 
+        // Edit Certificate Modal Logic
+        const editCertBtns = document.querySelectorAll('.edit-cert-btn');
+        const editCertModal = document.getElementById('editCertModal');
+        const editCertForm = document.getElementById('editCertForm');
+
+        if (editCertBtns && editCertModal && editCertForm) {
+            editCertBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    editCertForm.action = '/admin/certificate/edit/' + btn.dataset.id;
+                    document.getElementById('edit-cert-title').value = btn.dataset.title !== 'None' ? btn.dataset.title : '';
+                    document.getElementById('edit-cert-issuer').value = btn.dataset.issuer !== 'None' ? btn.dataset.issuer : '';
+                    document.getElementById('edit-cert-date').value = btn.dataset.date !== 'None' ? btn.dataset.date : '';
+                    document.getElementById('edit-cert-link').value = btn.dataset.link !== 'None' ? btn.dataset.link : '';
+                    document.getElementById('edit-cert-logo').value = btn.dataset.logo !== 'None' ? btn.dataset.logo : '';
+
+                    editCertModal.style.display = 'block';
+                });
+            });
+        }
+
         // Skill Category Select toggle logic
         const skillCategorySelect = document.getElementById('skill-category-select');
         if (skillCategorySelect) {
@@ -640,6 +729,16 @@
                 }
             });
         }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === editModal) {
+                editModal.style.display = 'none';
+            }
+            if (editCertModal && e.target === editCertModal) {
+                editCertModal.style.display = 'none';
+            }
+        });
     </script>
 </body>
 
