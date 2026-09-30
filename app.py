@@ -31,7 +31,19 @@ from urllib.parse import urlparse
 database_url = os.environ.get('DATABASE_URL')
 use_sqlite = True
 
-if database_url:
+# Check which PostgreSQL driver is available in the environment
+db_driver = None
+try:
+    import psycopg
+    db_driver = "psycopg"
+except ImportError:
+    try:
+        import psycopg2
+        db_driver = "psycopg2"
+    except ImportError:
+        db_driver = None
+
+if database_url and db_driver:
     try:
         parsed = urlparse(database_url)
         host = parsed.hostname
@@ -42,25 +54,31 @@ if database_url:
     except Exception as e:
         print(f"PostgreSQL connection test failed: {e}. Falling back to SQLite.")
 
-if not use_sqlite:
-    # SQL Alchemy requires postgresql:// instead of postgres://
+if not use_sqlite and db_driver:
+    # SQL Alchemy requires postgresql+<driver>:// instead of postgres://
     if database_url.startswith('postgres://'):
-        database_url = database_url.replace('postgres://', 'postgresql://', 1)
+        database_url = database_url.replace('postgres://', f'postgresql+{db_driver}://', 1)
+    elif database_url.startswith('postgresql://'):
+        database_url = database_url.replace('postgresql://', f'postgresql+{db_driver}://', 1)
+    elif not database_url.startswith(f'postgresql+{db_driver}://'):
+        database_url = database_url.replace('postgresql:', f'postgresql+{db_driver}:', 1)
     
     # Ensure sslmode=require for production environments like Render
-    if 'postgresql' in database_url and 'sslmode' not in database_url:
-        if '?' in database_url:
-            database_url += '&sslmode=require'
-        else:
-            database_url += '?sslmode=require'
-            
+    if 'sslmode' not in database_url:
+        database_url += ('&' if '?' in database_url else '?') + 'sslmode=require'
+        
     app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 else:
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///portfolio.db'
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(app)
+try:
+    db = SQLAlchemy(app)
+except Exception as e:
+    print(f"Database initialization failed with error: {e}. Falling back to SQLite.")
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///portfolio.db'
+    db = SQLAlchemy(app)
 
 # HTML Sanitization configuration for profile highlights
 ALLOWED_TAGS = ['span', 'strong', 'em', 'a', 'br', 'p', 'b', 'i']
