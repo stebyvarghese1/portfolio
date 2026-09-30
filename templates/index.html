@@ -277,7 +277,7 @@
             <div class="projects-stack">
                 {% for project in projects %}
                 <div class="stack-card" style="--card-index: {{ loop.index0 }};">
-                    <div class="project-inner reveal">
+                    <div class="project-inner">
                         <div class="project-visual">
                             <img src="{{ project.image_url }}" alt="{{ project.title }}">
                         </div>
@@ -317,8 +317,8 @@
             </div>
         </section>
 
-        <section id="skills" class="reveal">
-            <div class="section-head">
+        <section id="skills">
+            <div class="section-head reveal">
                 <h2>Technical <span class="text-gradient">Skills</span></h2>
             </div>
 
@@ -348,7 +348,13 @@
 
                 <!-- Slider Navigation Controls -->
                 <div class="slider-controls">
+                    <button class="slider-arrow prev-btn" id="skills-prev" aria-label="Previous Category" title="Previous Category">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
                     <div class="slider-dots"></div>
+                    <button class="slider-arrow next-btn" id="skills-next" aria-label="Next Category" title="Next Category">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
                 </div>
             </div>
         </section>
@@ -377,14 +383,14 @@
             </div>
         </section>
 
-        <section id="certificates" class="reveal">
-            <div class="section-head">
+        <section id="certificates">
+            <div class="section-head reveal">
                 <h2>My <span class="text-gradient">Certificates</span></h2>
             </div>
             <div class="certificates-stack">
                 {% for cert in certificates %}
                 <div class="certificate-stack-card" style="--card-index: {{ loop.index0 }};">
-                    <div class="certificate-inner-card reveal">
+                    <div class="certificate-inner-card">
                         <div class="certificate-visual">
                             {% if cert.logo_url %}
                             <img src="{{ cert.logo_url }}" alt="{{ cert.title }}">
@@ -474,18 +480,12 @@
             const sections = document.querySelectorAll("section");
             sections.forEach((section) => {
                 const id = section.getAttribute("id");
-                let sectionTop;
-                // #skills is wrapped in a tall sticky wrapper; use getBoundingClientRect
-                // so the active state matches the visible sticky position, not wrapper top
-                if (id === 'skills') {
-                    const wrapper = document.getElementById('skills-scroll-wrapper');
-                    sectionTop = wrapper
-                        ? wrapper.offsetTop
-                        : section.offsetTop;
-                } else {
-                    sectionTop = section.offsetTop;
+                let sectionTop = section.offsetTop;
+                if (id === 'skills' || id === 'contact') {
+                    const padTop = parseInt(window.getComputedStyle(section).paddingTop, 10) || 0;
+                    sectionTop += padTop;
                 }
-                if (pageYOffset >= sectionTop - 100) {
+                if (window.scrollY >= sectionTop - 160) {
                     current = id;
                 }
             });
@@ -517,28 +517,27 @@
             });
         });
 
-        // Skills nav link: scroll to the exact position where the section sticks
-        // (wrapper.offsetTop + 420px = the sticky snap point for top: -420px)
+        // Skills nav link: scroll smoothly to Technical Skills section
         document.querySelectorAll('a[href="#skills"]').forEach(link => {
             link.addEventListener('click', (e) => {
                 e.preventDefault();
-                const wrapper = document.getElementById('skills-scroll-wrapper');
-                const targetY = wrapper ? wrapper.offsetTop + 420 : document.getElementById('skills').offsetTop;
+                const skillsSection = document.getElementById('skills');
+                const head = skillsSection.querySelector('.section-head') || skillsSection;
+                const targetY = head.getBoundingClientRect().top + window.pageYOffset - 90;
                 window.scrollTo({ top: targetY, behavior: 'smooth' });
             });
         });
 
-        // Reveal Animation
+        // Smooth One-Time Reveal Animation
         const observerOptions = {
-            threshold: 0,
-            rootMargin: '0px 0px -10% 0px'
+            threshold: 0.1,
+            rootMargin: '0px 0px -40px 0px'
         };
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.classList.add('active');
-                } else {
-                    entry.target.classList.remove('active');
+                    observer.unobserve(entry.target);
                 }
             });
         }, observerOptions);
@@ -589,159 +588,312 @@
         });
 
 
-        // Sticky Scroll-Lock Category Cards Slider
+        // 3D Cylindrical Category Cards Carousel
         (function() {
             const carousel = document.querySelector('.category-carousel');
             if (!carousel) return;
 
-            const skillsSection = document.getElementById('skills');
             const track = carousel.querySelector('.category-track');
             const cards = Array.from(carousel.querySelectorAll('.category-card'));
             const dotsContainer = carousel.querySelector('.slider-dots');
+            const prevBtn = carousel.querySelector('#skills-prev');
+            const nextBtn = carousel.querySelector('#skills-next');
 
             if (!track || cards.length === 0) return;
 
             let currentIndex = 0;
 
-            // ── Dots ────────────────────────────────────────────────────────
+            // ── Track and Card Height Alignment ──────────────────────────────
+            function updateTrackHeight() {
+                let maxHeight = 0;
+                cards.forEach(card => {
+                    card.style.minHeight = 'auto';
+                    const h = card.scrollHeight;
+                    if (h > maxHeight) maxHeight = h;
+                });
+                if (maxHeight > 0) {
+                    track.style.height = `${maxHeight}px`;
+                    cards.forEach(card => {
+                        card.style.minHeight = `${maxHeight}px`;
+                    });
+                }
+            }
+
+            // ── Dots ─────────────────────────────────────────────────────────
             function renderDots() {
                 dotsContainer.innerHTML = '';
                 if (cards.length <= 1) {
                     dotsContainer.style.display = 'none';
+                    if (prevBtn) prevBtn.style.display = 'none';
+                    if (nextBtn) nextBtn.style.display = 'none';
                     return;
                 }
                 cards.forEach((_, i) => {
                     const dot = document.createElement('button');
                     dot.classList.add('slider-dot');
+                    dot.setAttribute('aria-label', `Go to category slide ${i + 1}`);
                     if (i === currentIndex) dot.classList.add('active');
                     dot.addEventListener('click', () => goToSlide(i));
                     dotsContainer.appendChild(dot);
                 });
             }
 
-            // ── Slider state ─────────────────────────────────────────────────
-            function updateSlider() {
-                track.style.transform = `translate3d(${-currentIndex * 100}%, 0, 0)`;
+            // ── 3D Cylindric Positioning Engine ──────────────────────────────
+            function applyCylindricTransforms(dragProgress = 0) {
+                const W = carousel.offsetWidth;
+                const isMobile = W < 640;
+                const isTablet = W >= 640 && W < 1000;
+
+                // Cylindrical geometry parameters
+                const xStep = isMobile ? W * 0.70 : (isTablet ? W * 0.52 : Math.min(500, W * 0.43));
+                const zPush = isMobile ? -140 : -190;
+                const rotAngle = isMobile ? 30 : 34;
+                const sideScale = isMobile ? 0.88 : 0.86;
+
+                cards.forEach((card, i) => {
+                    let offset = i - currentIndex;
+                    if (cards.length > 2) {
+                        const half = cards.length / 2;
+                        while (offset > half) offset -= cards.length;
+                        while (offset < -half) offset += cards.length;
+                    }
+
+                    const effectiveOffset = offset + dragProgress;
+                    const absOffset = Math.abs(effectiveOffset);
+
+                    let x = 0;
+                    let z = 0;
+                    let rotateY = 0;
+                    let scale = 1;
+                    let opacity = 1;
+                    let filter = 'none';
+                    let zIndex = 10;
+                    let pointerEvents = 'none';
+
+                    if (absOffset < 0.05) {
+                        // Front face of cylinder
+                        x = 0;
+                        z = 0;
+                        rotateY = 0;
+                        scale = 1;
+                        opacity = 1;
+                        filter = 'none';
+                        zIndex = 20;
+                        pointerEvents = 'auto';
+                        card.classList.add('is-active');
+                    } else if (absOffset <= 1.4) {
+                        // Visible curved sides along cylinder wall
+                        const sign = effectiveOffset > 0 ? 1 : -1;
+                        const factor = Math.min(1.2, absOffset);
+                        x = sign * xStep * factor;
+                        z = zPush * factor;
+                        rotateY = -sign * rotAngle * factor;
+                        scale = 1 - (1 - sideScale) * factor;
+                        opacity = Math.max(0.25, 1 - 0.45 * factor);
+                        filter = absOffset > 0.45 ? 'blur(0.5px)' : 'none';
+                        zIndex = Math.round(15 - factor * 6);
+                        pointerEvents = 'auto';
+                        card.classList.remove('is-active');
+                    } else {
+                        // Rear of cylinder (hidden or deep in background)
+                        const sign = effectiveOffset > 0 ? 1 : -1;
+                        x = sign * xStep * 1.6;
+                        z = zPush * 2.2;
+                        rotateY = -sign * 55;
+                        scale = 0.72;
+                        opacity = 0;
+                        filter = 'blur(2px)';
+                        zIndex = 1;
+                        pointerEvents = 'none';
+                        card.classList.remove('is-active');
+                    }
+
+                    card.style.transform = `translateX(-50%) translate3d(${x.toFixed(1)}px, 0, ${z.toFixed(1)}px) rotateY(${rotateY.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+                    card.style.opacity = opacity.toFixed(2);
+                    card.style.filter = filter;
+                    card.style.zIndex = zIndex;
+                    card.style.pointerEvents = pointerEvents;
+                });
+
+                // Update dots
                 Array.from(dotsContainer.querySelectorAll('.slider-dot'))
                     .forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
+
+                // Update boundary arrows if 2 or fewer cards
+                if (cards.length <= 2) {
+                    if (prevBtn) prevBtn.disabled = (currentIndex === 0);
+                    if (nextBtn) nextBtn.disabled = (currentIndex === cards.length - 1);
+                } else {
+                    if (prevBtn) prevBtn.disabled = false;
+                    if (nextBtn) nextBtn.disabled = false;
+                }
             }
 
             function goToSlide(idx) {
-                currentIndex = Math.max(0, Math.min(idx, cards.length - 1));
-                updateSlider();
+                if (cards.length > 2) {
+                    currentIndex = (idx + cards.length) % cards.length;
+                } else {
+                    currentIndex = Math.max(0, Math.min(idx, cards.length - 1));
+                }
+                cards.forEach(card => {
+                    card.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                });
+                applyCylindricTransforms(0);
             }
 
-            // ── Swipe / Drag ──────────────────────────────────────────────────
-            let isDragging = false, startX = 0, currentTranslate = 0, prevTranslate = 0;
+            // Click on peeking side cards to bring them to front
+            cards.forEach((card, i) => {
+                card.addEventListener('click', (e) => {
+                    if (card.classList.contains('is-active')) return;
+                    let offset = i - currentIndex;
+                    if (cards.length > 2) {
+                        const half = cards.length / 2;
+                        while (offset > half) offset -= cards.length;
+                        while (offset < -half) offset += cards.length;
+                    }
+                    if (offset === -1) {
+                        e.preventDefault();
+                        goToSlide(currentIndex - 1);
+                    } else if (offset === 1) {
+                        e.preventDefault();
+                        goToSlide(currentIndex + 1);
+                    }
+                });
+            });
 
-            function getTranslateX() {
-                const t = window.getComputedStyle(track).transform;
-                if (!t || t === 'none') return 0;
-                const m = t.match(/^matrix\((.+)\)$/);
-                return m ? parseFloat(m[1].split(',')[4]) : 0;
+            if (prevBtn) {
+                prevBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    goToSlide(currentIndex - 1);
+                });
             }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    goToSlide(currentIndex + 1);
+                });
+            }
+
+            // Keyboard navigation
+            carousel.setAttribute('tabindex', '0');
+            carousel.style.outline = 'none';
+            carousel.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    goToSlide(currentIndex - 1);
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    goToSlide(currentIndex + 1);
+                }
+            });
+
+            // ── 3D Cylindrical Drag & Touch Swipe ─────────────────────────────
+            let isDragging = false;
+            let startX = 0;
+            let startY = 0;
+            let dragProgress = 0;
+            let isHorizontalSwipe = null;
+
+            // Desktop Mouse Drag
+            track.style.cursor = 'grab';
 
             track.addEventListener('mousedown', e => {
-                isDragging = true; startX = e.clientX;
-                prevTranslate = getTranslateX();
-                track.style.transition = 'none'; track.style.cursor = 'grabbing';
+                if (e.button !== 0) return;
+                isDragging = true;
+                startX = e.clientX;
+                dragProgress = 0;
+                track.style.cursor = 'grabbing';
+                cards.forEach(card => card.style.transition = 'none');
             });
-            track.addEventListener('touchstart', e => {
-                isDragging = true; startX = e.touches[0].clientX;
-                prevTranslate = getTranslateX(); track.style.transition = 'none';
-            }, { passive: true });
-            track.addEventListener('mousemove', e => {
+
+            window.addEventListener('mousemove', e => {
                 if (!isDragging) return;
-                currentTranslate = prevTranslate + (e.clientX - startX);
-                track.style.transform = `translate3d(${currentTranslate}px, 0, 0)`;
+                const diffX = e.clientX - startX;
+                dragProgress = diffX / (carousel.offsetWidth * 0.65);
+                applyCylindricTransforms(dragProgress);
             });
-            track.addEventListener('touchmove', e => {
-                if (!isDragging) return;
-                currentTranslate = prevTranslate + (e.touches[0].clientX - startX);
-                track.style.transform = `translate3d(${currentTranslate}px, 0, 0)`;
-            }, { passive: true });
-            function onDragEnd() {
+
+            window.addEventListener('mouseup', () => {
                 if (!isDragging) return;
                 isDragging = false;
-                track.style.transition = 'transform 0.6s cubic-bezier(0.25, 1, 0.5, 1)';
                 track.style.cursor = 'grab';
-                const diff = currentTranslate - prevTranslate;
-                const threshold = carousel.offsetWidth * 0.2;
-                if (diff < -threshold)      goToSlide(currentIndex + 1);
-                else if (diff > threshold)  goToSlide(currentIndex - 1);
-                else                        updateSlider();
-            }
-            track.addEventListener('mouseup', onDragEnd);
-            track.addEventListener('touchend', onDragEnd);
-            track.addEventListener('mouseleave', onDragEnd);
-
-            // ── Sticky Scroll-Lock Setup ──────────────────────────────────────
-            // A tall wrapper is injected around #skills. The section becomes
-            // position:sticky so it pins at top:0 while the wrapper scrolls past.
-            // Each slide gets scrollPerSlide px of scroll to advance.
-            // When all slides are shown the wrapper ends and normal scroll resumes.
-            const scrollPerSlide = window.innerHeight * 0.4;
-            const extraHeight = (cards.length - 1) * scrollPerSlide;
-
-            const wrapper = document.createElement('div');
-            wrapper.id = 'skills-scroll-wrapper';
-            wrapper.style.position = 'relative';
-
-            skillsSection.parentNode.insertBefore(wrapper, skillsSection);
-            wrapper.appendChild(skillsSection);
-
-            function sizeWrapper() {
-                wrapper.style.height = (skillsSection.offsetHeight + extraHeight) + 'px';
-            }
-            sizeWrapper();
-            window.addEventListener('resize', sizeWrapper);
-
-            // Make section sticky inside the wrapper.
-            // #skills has 500px padding-top in CSS (to clear the projects stack negative margin).
-            // Set top = -(padding - navbar height) so the visible content aligns at ~80px from top,
-            // matching the same behaviour as #projects .section-head (top: 80px).
-            skillsSection.style.position = 'sticky';
-            skillsSection.style.top = '-420px'; // -(500px padding - 80px navbar)
-
-
-            // ── Scroll handler ────────────────────────────────────────────────
-            // stickyTopOffset = absolute value of skillsSection.style.top (-420px).
-            // The wrapper scrolls this many px BEFORE the section actually sticks.
-            // We subtract it so progress/slides only advance once the section is pinned.
-            const stickyTopOffset = 420;
-            let ticking = false;
-            window.addEventListener('scroll', () => {
-                if (ticking) return;
-                ticking = true;
-                requestAnimationFrame(() => {
-                    // Raw scroll distance of wrapper above viewport top
-                    const scrolledIn = -wrapper.getBoundingClientRect().top;
-                    // Only count scroll that happens AFTER the section has stuck
-                    const adjustedScrolledIn = Math.max(0, scrolledIn - stickyTopOffset);
-                    // Slide budget = extra height added to wrapper for slide transitions
-                    const progress = Math.max(0, Math.min(1, adjustedScrolledIn / extraHeight));
-
-                    // Map progress to slide index
-                    const target = Math.min(
-                        Math.floor(progress * cards.length),
-                        cards.length - 1
-                    );
-                    if (target !== currentIndex) goToSlide(target);
-                    ticking = false;
+                cards.forEach(card => {
+                    card.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)';
                 });
+                if (dragProgress < -0.12) {
+                    goToSlide(currentIndex + 1);
+                } else if (dragProgress > 0.12) {
+                    goToSlide(currentIndex - 1);
+                } else {
+                    applyCylindricTransforms(0);
+                }
+                dragProgress = 0;
+            });
+
+            // Mobile Touch Swipe
+            track.addEventListener('touchstart', e => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                dragProgress = 0;
+                isHorizontalSwipe = null;
+                cards.forEach(card => card.style.transition = 'none');
             }, { passive: true });
 
-            // ── Init ──────────────────────────────────────────────────────────
-            renderDots();
-            updateSlider();
+            track.addEventListener('touchmove', e => {
+                const diffX = e.touches[0].clientX - startX;
+                const diffY = e.touches[0].clientY - startY;
+
+                if (isHorizontalSwipe === null) {
+                    if (Math.abs(diffX) > 8 || Math.abs(diffY) > 8) {
+                        isHorizontalSwipe = Math.abs(diffX) > Math.abs(diffY);
+                    }
+                }
+
+                if (isHorizontalSwipe) {
+                    if (e.cancelable) e.preventDefault();
+                    dragProgress = diffX / (carousel.offsetWidth * 0.65);
+                    applyCylindricTransforms(dragProgress);
+                }
+            }, { passive: false });
+
+            track.addEventListener('touchend', () => {
+                cards.forEach(card => {
+                    card.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                });
+                if (isHorizontalSwipe) {
+                    if (dragProgress < -0.12) {
+                        goToSlide(currentIndex + 1);
+                    } else if (dragProgress > 0.12) {
+                        goToSlide(currentIndex - 1);
+                    } else {
+                        applyCylindricTransforms(0);
+                    }
+                } else {
+                    applyCylindricTransforms(0);
+                }
+                isHorizontalSwipe = null;
+                dragProgress = 0;
+            });
+
+            // ── Resize & Init ─────────────────────────────────────────────────
+            function initCylindricCarousel() {
+                updateTrackHeight();
+                renderDots();
+                applyCylindricTransforms(0);
+            }
+
+            initCylindricCarousel();
+            window.addEventListener('resize', () => {
+                updateTrackHeight();
+                applyCylindricTransforms(0);
+            });
+            window.addEventListener('load', () => {
+                updateTrackHeight();
+                applyCylindricTransforms(0);
+            });
         })();
 
-
-        // Final Fix: Force browser to calculate sticky/reveal states on load
-        window.addEventListener('load', () => {
-            window.scrollTo(window.scrollX, window.scrollY + 1);
-            window.scrollTo(window.scrollX, window.scrollY - 1);
-        });
     </script>
 </body>
 
