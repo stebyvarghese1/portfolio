@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login | Steby Varghese</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% if theme_colors %}
+    <style id="custom-theme-vars">
+        :root {
+            --primary: {{ theme_colors.primary.final }};
+            --primary-light: {{ theme_colors.primary_light.final }};
+            --secondary: {{ theme_colors.secondary.final }};
+            --accent: {{ theme_colors.accent.final }};
+            --bg-darker: {{ theme_colors.bg_darker.final }};
+            --bg-dark: {{ theme_colors.bg_dark.final }};
+            --text-main: {{ theme_colors.text_main.final }};
+            --text-dim: {{ theme_colors.text_dim.final }};
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+    <div class="gradient-bg{% if profile and profile.background_image_url %} has-bg-image{% endif %}"
+         {% if profile and profile.background_image_url %}style="--bg-image: url('{{ profile.background_image_url }}'); --bg-overlay: {{ profile.background_overlay or '0.55' }};"{% endif %}>
+    </div>
+
+    <div style="display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 2rem; position: relative; z-index: 10;">
+        <div class="glass-card login-card">
+        <div style="text-align: center; margin-bottom: 2.5rem;">
+            <div class="logo" style="margin-bottom: 1rem;"><span class="text-gradient">ADMIN</span>.PORTAL</div>
+            <p style="color: var(--text-dim);">Please sign in to continue</p>
+        </div>
+
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div
+            style="background: rgba(255, 0, 0, 0.1); color: #ff4d4d; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.9rem; border: 1px solid rgba(255, 0, 0, 0.2);">
+            <i class="fas fa-exclamation-circle" style="margin-right: 0.5rem;"></i> {{ message }}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <form method="POST">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Enter username" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary"
+                style="width: 100%; justify-content: center; margin-top: 1rem;">
+                Sign In
+            </button>
+        </form>
+
+        <div style="text-align: center; margin-top: 2rem;">
+            <a href="{{ url_for('index') }}" style="color: var(--text-dim); text-decoration: none; font-size: 0.9rem;">
+                <i class="fas fa-arrow-left"></i> Back to Portfolio
+            </a>
+        </div>
+    </div>
+
+
+
+    </div>
+</body>
+
+</html>

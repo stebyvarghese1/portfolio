@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- Basic -->
+    <meta charset="UTF-8">
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"
+    >
+
+    <!-- SEO -->
+    <title>Steby Varghese | Aspiring Security Analyst & Agentic AI Developer</title>
+
+    <meta
+        name="description"
+        content="Steby Varghese is an aspiring security analyst and agentic AI developer based in Kerala, India, specializing in penetration testing, web security, agentic AI, and full-stack web development."
+    >
+
+    <meta name="author" content="Steby Varghese">
+
+    <!-- Canonical -->
+    <link
+        rel="canonical"
+        href="https://www.stebyvarghese.in/"
+    >
+
+    <!-- Favicon -->
+    <link
+        rel="icon"
+        type="image/png"
+        href="/favicon.png"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="192x192"
+        href="/favicon-192x192.png"
+    >
+
+    <link
+        rel="icon"
+        type="image/png"
+        sizes="96x96"
+        href="/favicon-96x96.png"
+    >
+
+    <link
+        rel="apple-touch-icon"
+        href="/favicon-192x192.png"
+    >
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+
+    <meta
+        property="og:url"
+        content="https://www.stebyvarghese.in/"
+    >
+
+    <meta
+        property="og:title"
+        content="Steby Varghese | Aspiring Security Analyst & Agentic AI Developer"
+    >
+
+    <meta
+        property="og:description"
+        content="Aspiring security analyst and agentic AI developer based in Kerala, India, specializing in penetration testing, web security, agentic AI, and full-stack web development."
+    >
+
+    <meta
+        property="og:image"
+        content="https://www.stebyvarghese.in/og-image.png"
+    >
+    <meta property="og:image:width" content="1086">
+    <meta property="og:image:height" content="1449">
+    <meta property="og:image:alt" content="Steby Varghese - Cybersecurity & Software Engineer">
+
+    <meta
+        property="og:site_name"
+        content="Steby Varghese"
+    >
+
+    <!-- Person Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Person",
+        "name": "Steby Varghese",
+        "url": "https://www.stebyvarghese.in/",
+        "jobTitle": "Aspiring Security Analyst & Agentic AI Developer",
+        "description": "Aspiring security analyst and agentic AI developer based in Kerala, India, specializing in penetration testing, web security, agentic AI, and full-stack web development.",
+        "sameAs": [
+            "https://github.com/stebyvarghese1"
+        ]
+    }
+    </script>
+
+    <!-- Styles -->
+    <link
+        rel="stylesheet"
+        href="{{ url_for('static', filename='css/style.css') }}"
+    >
+
+    <!-- Font Awesome -->
+    <link
+        rel="stylesheet"
+        href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    >
+
+    <!-- Dynamic Theme Colors & Brightness -->
+    {% if theme_colors %}
+    <style id="custom-theme-vars">
+        :root {
+            --primary: {{ theme_colors['primary']['effective'] }};
+            --primary-light: {{ theme_colors['primary_light']['effective'] }};
+            --secondary: {{ theme_colors['secondary']['effective'] }};
+            --accent: {{ theme_colors['accent']['effective'] }};
+            --bg-darker: {{ theme_colors['bg_darker']['effective'] }};
+            --bg-dark: {{ theme_colors['bg_dark']['effective'] }};
+            --text-main: {{ theme_colors['text_main']['effective'] }};
+            --text-dim: {{ theme_colors['text_dim']['effective'] }};
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body>
+    <div class="gradient-bg{% if profile and profile.background_image_url %} has-bg-image{% endif %}"
+         {% if profile and profile.background_image_url %}style="--bg-image: url('{{ profile.background_image_url }}'); --bg-overlay: {{ profile.background_overlay or '0.55' }};"{% endif %}>
+    </div>
+
+    <nav id="navbar">
+        <div class="logo" onclick="window.scrollTo(0,0)"><span class="text-gradient">STEBY </span> VARGHESE</div>
+
+        <!-- Mobile Toggle Button -->
+        <div class="mobile-toggle" id="mobile-toggle">
+            <div class="bar"></div>
+            <div class="bar"></div>
+            <div class="bar"></div>
+        </div>
+
+        <div class="nav-links" id="nav-links">
+            <div class="mobile-menu-header">
+                <div class="logo"><span class="text-gradient">STEBY VARGHESE</span></div>
+            </div>
+
+            <a href="#home" class="nav-item"><i class="fas fa-home"></i> Home</a>
+            <a href="#about" class="nav-item"><i class="fas fa-user"></i> About</a>
+            <a href="#projects" class="nav-item"><i class="fas fa-code"></i> Projects</a>
+            <a href="#skills" class="nav-item"><i class="fas fa-tools"></i> Skills</a>
+            <a href="#education" class="nav-item"><i class="fas fa-graduation-cap"></i> Education</a>
+            <a href="#certificates" class="nav-item"><i class="fas fa-certificate"></i> Certificates</a>
+            <a href="#contact" class="nav-item"><i class="fas fa-envelope"></i> Contact</a>
+
+            <div class="mobile-menu-footer">
+                <p>Let's Connect</p>
+                <div class="social-links">
+                    <a href="https://github.com/stebyvarghese1"><i class="fab fa-github"></i></a>
+                    <a href="https://www.linkedin.com/in/steby-varghese"><i class="fab fa-linkedin"></i></a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <section id="home" class="hero reveal">
+            <div class="hero-content">
+                <p class="tagline">
+                    {% if profile and profile.greeting %}
+                        {{ profile.greeting }}
+                    {% else %}
+                        Hello, I'm
+                    {% endif %}
+                </p>
+                <h1>
+                    {% if profile and profile.name %}
+                        {% set name_parts = profile.name.split(' ') %}
+                        <span class="text-gradient">{{ name_parts[0] }}</span> {{ name_parts[1:] | join(' ') }}
+                    {% else %}
+                        <span class="text-gradient">STEBY</span> VARGHESE
+                    {% endif %}
+                </h1>
+                <p class="description">
+                    {% if profile and profile.tagline %}
+                        {{ profile.tagline | safe }}
+                    {% else %}
+                        Aspiring <span style="color: var(--primary);">Security Analyst</span> & Agentic AI Developer
+                    {% endif %}
+                </p>
+                <div class="hero-btns">
+                    <a href="#projects" class="btn btn-primary">
+                        <span>Explore Projects</span>
+                        <i class="fas fa-arrow-right"></i>
+                    </a>
+                    <a href="#about" class="btn btn-secondary">
+                        <i class="fas fa-play"></i>
+                        <span>My Story</span>
+                    </a>
+                </div>
+            </div>
+            <div class="hero-image">
+                <div class="image-wrapper">
+                    {% if profile and profile.photo_url %}
+                    <img src="{{ profile.photo_url }}" alt="Steby Varghese Profile">
+                    {% else %}
+                    <img src="{{ url_for('static', filename='img/favicon_icon_1766679969783.png') }}"
+                        alt="Steby Varghese Profile">
+                    {% endif %}
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="reveal">
+            <div class="section-head">
+                <h2>About <span class="text-gradient">Me</span></h2>
+            </div>
+            <div class="glass-card">
+                <div class="about-grid">
+                    <div>
+                        <p style="font-size: 1.2rem; margin-bottom: 1.5rem;">
+                            {% if profile and profile.about_intro %}
+                                {{ profile.about_intro | safe }}
+                            {% else %}
+                                Hello! I'm <span class="text-gradient" style="font-weight: 700;">Steby Varghese</span>, a cybersecurity enthusiast and developer based in Kerala, India. I specialize in exploring offensive security, penetration testing, agentic AI, and full-stack web development.
+                            {% endif %}
+                        </p>
+                        <p style="color: var(--text-dim); margin-bottom: 2rem;">
+                            {% if profile and profile.about_text %}
+                                {{ profile.about_text | safe }}
+                            {% else %}
+                                My journey in technology is driven by curiosity, continuous learning, and a passion for solving real-world problems. I work with technologies including Python, Flask, Django, JavaScript, MongoDB, PostgreSQL, and Supabase, while exploring cybersecurity, ethical hacking, AI-powered applications, and agentic development. I continuously strengthen my skills through hands-on projects, CTF challenges, and practical security labs.
+                            {% endif %}
+                        </p>
+                        <div class="stats-container">
+                            <div class="stat-item">
+                                <strong class="text-gradient">
+                                    {% if profile and profile.stat_1_value %}
+                                        {{ profile.stat_1_value }}
+                                    {% else %}
+                                        3+
+                                    {% endif %}
+                                </strong>
+                                <span>
+                                    {% if profile and profile.stat_1_label %}
+                                        {{ profile.stat_1_label }}
+                                    {% else %}
+                                        Years project Experience
+                                    {% endif %}
+                                </span>
+                            </div>
+                            <div class="stat-item">
+                                <strong class="text-gradient">
+                                    {% if profile and profile.stat_2_value %}
+                                        {{ profile.stat_2_value }}
+                                    {% else %}
+                                        6+
+                                    {% endif %}
+                                </strong>
+                                <span>
+                                    {% if profile and profile.stat_2_label %}
+                                        {{ profile.stat_2_label }}
+                                    {% else %}
+                                        Projects Completed
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card about-image-card">
+                        {% if profile and profile.about_image_url %}
+                        <img src="{{ profile.about_image_url }}" alt="About Steby"
+                            style="width: 100%; height: 100%; object-fit: cover; border-radius: 12px; transition: 0.5s var(--transition);"
+                            onmouseover="this.style.transform='scale(1.05)'"
+                            onmouseout="this.style.transform='scale(1)'">
+                        {% else %}
+                        <i class="fas fa-user-graduate" style="font-size: 4rem; color: var(--primary);"></i>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects">
+            <div class="section-head reveal">
+                <h2>Featured <span class="text-gradient">Projects</span></h2>
+            </div>
+            <div class="projects-stack">
+                {% for project in projects %}
+                <div class="stack-card" style="--card-index: {{ loop.index0 }};">
+                    <div class="project-inner">
+                        <div class="project-visual">
+                            <img src="{{ project.image_url }}" alt="{{ project.title }}">
+                        </div>
+                        <div class="project-details">
+                            <h3>{{ project.title }}</h3>
+                            <p>{{ project.description | safe }}</p>
+                            <div class="tech-tags">
+                                {% for tech in project.technologies.split(',') %}
+                                <span class="tag">{{ tech.strip() }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="project-actions">
+                                {% if project.link %}
+                                <a href="{{ project.link }}" target="_blank" class="btn btn-primary" {% if
+                                    project.link=='#' %}style="pointer-events: none; opacity: 0.7;" {% endif %}>
+                                    {% if project.link == '#' %}
+                                    <span>No Source</span>
+                                    <i class="fas fa-lock"></i>
+                                    {% else %}
+                                    <span>Source Code</span>
+                                    <i class="fab fa-github"></i>
+                                    {% endif %}
+                                </a>
+                                {% endif %}
+                                {% if project.preview_link %}
+                                <a href="{{ project.preview_link }}" target="_blank" class="btn btn-secondary"
+                                    style="border-width: 1px;">
+                                    <span>Live Preview</span>
+                                    <i class="fas fa-external-link-alt"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section id="skills">
+            <div class="section-head reveal">
+                <h2>Technical <span class="text-gradient">Skills</span></h2>
+            </div>
+
+            <!-- Category Carousel Slide Layout -->
+            <div class="category-carousel">
+                <div class="category-track">
+                    {% for category in categories %}
+                    <div class="category-card">
+                        <h3 class="category-title text-gradient">{{ category }}</h3>
+                        <div class="skills-grid">
+                            {% for skill in skills if skill.category == category %}
+                            <div class="skill-card-item">
+                                <div class="skill-logo-box">
+                                    {% if skill.logo_url %}
+                                    <img src="{{ skill.logo_url }}" alt="{{ skill.name }}" loading="lazy">
+                                    {% else %}
+                                    <i class="fas fa-tools"></i>
+                                    {% endif %}
+                                </div>
+                                <span class="skill-name">{{ skill.name }}</span>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Slider Navigation Controls -->
+                <div class="slider-controls">
+                    <button class="slider-arrow prev-btn" id="skills-prev" aria-label="Previous Category" title="Previous Category">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="slider-dots"></div>
+                    <button class="slider-arrow next-btn" id="skills-next" aria-label="Next Category" title="Next Category">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section id="education" class="reveal">
+            <div class="section-head">
+                <h2><span class="text-gradient">Education</span></h2>
+            </div>
+            <div class="timeline">
+                {% for edu in education %}
+                <div class="glass-card timeline-item">
+                    {% if edu.logo_url %}
+                    <img src="{{ edu.logo_url }}" alt="{{ edu.institution }} Logo" class="timeline-logo">
+                    {% else %}
+                    <div class="timeline-logo-placeholder">
+                        <i class="fas fa-graduation-cap"></i>
+                    </div>
+                    {% endif %}
+                    <div class="timeline-content">
+                        <span style="color: var(--primary); font-weight: 700; font-size: 0.9rem;">{{ edu.duration }}</span>
+                        <h3 style="margin: 0.5rem 0;">{{ edu.degree }}</h3>
+                        <p style="color: var(--secondary); font-weight: 600;">{{ edu.institution }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section id="certificates">
+            <div class="section-head reveal">
+                <h2>My <span class="text-gradient">Certificates</span></h2>
+            </div>
+            <div class="certificates-stack">
+                {% for cert in certificates %}
+                <div class="certificate-stack-card" style="--card-index: {{ loop.index0 }};">
+                    <div class="certificate-inner-card">
+                        <div class="certificate-visual">
+                            {% if cert.logo_url %}
+                            <img src="{{ cert.logo_url }}" alt="{{ cert.title }}">
+                            {% else %}
+                            <div class="cert-placeholder">
+                                <i class="fas fa-certificate"></i>
+                                <span style="color: var(--text-dim); font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; font-weight: 600;">Certification Credential</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="certificate-details">
+                            <h3>{{ cert.title }}</h3>
+                            <p class="issuer">{{ cert.issuer }}</p>
+                            {% if cert.date_earned %}
+                            <p class="date"><i class="far fa-calendar-alt"></i> {{ cert.date_earned }}</p>
+                            {% endif %}
+                            <a href="{{ cert.credential_link if cert.credential_link else '#' }}" target="_blank" class="btn btn-primary verify-btn" {% if not cert.credential_link or cert.credential_link == '#' %}style="pointer-events: none; opacity: 0.5;"{% endif %}>
+                                <span>Verify</span>
+                                <i class="fas fa-external-link-alt"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <section id="contact" class="reveal">
+            <div class="section-head">
+                <h2>Get In <span class="text-gradient">Touch</span></h2>
+            </div>
+            <div class="glass-card" style="max-width: 800px; margin: 0 auto;">
+                <div class="contact-grid">
+                    <div>
+                        <h3 style="margin-bottom: 1.5rem;">Let's talk about your next project</h3>
+                        <p style="color: var(--text-dim); margin-bottom: 2rem;">
+                            I'm currently available for freelance work and full-time positions.
+                            If you have a project that needs some creative injection, that's where I come in!
+                        </p>
+                        <div style="display: flex; flex-direction: column; gap: 1rem;">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <i class="fas fa-envelope" style="color: var(--primary);"></i>
+                                <span>stebyvarghese1@gmail.com</span>
+                            </div>
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <i class="fas fa-map-marker-alt" style="color: var(--primary);"></i>
+                                <span>Kerala, India</span>
+                            </div>
+                        </div>
+                    </div>
+                    <form id="contact-form" action="https://formspree.io/f/mdklnejr" method="POST"
+                        style="display: flex; flex-direction: column; gap: 1.2rem;">
+                        <input type="text" name="name" placeholder="Your Name" required>
+                        <input type="email" name="email" placeholder="Your Email" required>
+                        <textarea name="message" rows="4" placeholder="Your Message" required></textarea>
+                        <button type="submit" id="submit-btn" class="btn btn-primary" style="justify-content: center;">
+                            <span>Send Message</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <footer style="text-align: center; padding: 5rem 0; border-top: 1px solid var(--glass-border);">
+            <div class="logo" style="margin-bottom: 2rem;"><span class="text-gradient">STEBY</span> VARGHESE</div>
+            <div style="display: flex; justify-content: center; gap: 2rem; margin-bottom: 2rem;">
+                <a href="https://github.com/stebyvarghese1" style="color: var(--text-dim); transition: 0.3s;"
+                    onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-dim)'"><i
+                        class="fab fa-github fa-xl"></i></a>
+                <a href="https://www.linkedin.com/in/steby-varghese" style="color: var(--text-dim); transition: 0.3s;"
+                    onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-dim)'"><i
+                        class="fab fa-linkedin fa-xl"></i></a>
+            </div>
+            <p style="color: var(--text-dim); font-size: 0.9rem;">&copy; 2025 Steby Varghese. Created with passion.</p>
+        </footer>
+    </div>
+
+    <script>
+        // Scroll Navbar Effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('navbar');
+            if (window.scrollY > 50) nav.classList.add('scrolled');
+            else nav.classList.remove('scrolled');
+
+            // Highlight active nav link
+            let current = "";
+            const sections = document.querySelectorAll("section");
+            sections.forEach((section) => {
+                const id = section.getAttribute("id");
+                let sectionTop = section.offsetTop;
+                if (id === 'skills' || id === 'contact') {
+                    const padTop = parseInt(window.getComputedStyle(section).paddingTop, 10) || 0;
+                    sectionTop += padTop;
+                }
+                if (window.scrollY >= sectionTop - 160) {
+                    current = id;
+                }
+            });
+
+            document.querySelectorAll(".nav-links a").forEach((a) => {
+                a.classList.remove("active");
+                if (a.getAttribute("href").includes(current)) {
+                    a.classList.add("active");
+                }
+            });
+        });
+
+        // Mobile Menu Logic
+        const mobileToggle = document.getElementById('mobile-toggle');
+        const navLinks = document.getElementById('nav-links');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        mobileToggle.addEventListener('click', () => {
+            mobileToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : 'initial';
+        });
+
+        navItems.forEach(item => {
+            item.addEventListener('click', () => {
+                mobileToggle.classList.remove('active');
+                navLinks.classList.remove('active');
+                document.body.style.overflow = 'initial';
+            });
+        });
+
+        // Skills nav link: scroll smoothly to Technical Skills section
+        document.querySelectorAll('a[href="#skills"]').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const skillsSection = document.getElementById('skills');
+                const head = skillsSection.querySelector('.section-head') || skillsSection;
+                const targetY = head.getBoundingClientRect().top + window.pageYOffset - 90;
+                window.scrollTo({ top: targetY, behavior: 'smooth' });
+            });
+        });
+
+        // Smooth One-Time Reveal Animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -40px 0px'
+        };
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('active');
+                    observer.unobserve(entry.target);
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+
+
+
+        // Contact Form Handler
+        const contactForm = document.getElementById('contact-form');
+        const submitBtn = document.getElementById('submit-btn');
+
+        contactForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> <span>Sending...</span>';
+            submitBtn.disabled = true;
+
+            try {
+                const response = await fetch(contactForm.action, {
+                    method: 'POST',
+                    body: new FormData(contactForm),
+                    headers: { 'Accept': 'application/json' }
+                });
+
+                if (response.ok) {
+                    submitBtn.innerHTML = '<i class="fas fa-check"></i> <span>Message Sent!</span>';
+                    submitBtn.style.background = 'linear-gradient(135deg, #00b09b, #96c93d)';
+                    contactForm.reset();
+                    setTimeout(() => {
+                        submitBtn.innerHTML = originalText;
+                        submitBtn.style.background = '';
+                        submitBtn.disabled = false;
+                    }, 5000);
+                } else {
+                    throw new Error();
+                }
+            } catch (err) {
+                submitBtn.innerHTML = '<i class="fas fa-exclamation-triangle"></i> <span>Error! Try again.</span>';
+                submitBtn.style.background = '#ff4b2b';
+                setTimeout(() => {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.style.background = '';
+                    submitBtn.disabled = false;
+                }, 3000);
+            }
+        });
+
+
+        // 3D Cylindrical Category Cards Carousel
+        (function() {
+            const carousel = document.querySelector('.category-carousel');
+            if (!carousel) return;
+
+            const track = carousel.querySelector('.category-track');
+            const cards = Array.from(carousel.querySelectorAll('.category-card'));
+            const dotsContainer = carousel.querySelector('.slider-dots');
+            const prevBtn = carousel.querySelector('#skills-prev');
+            const nextBtn = carousel.querySelector('#skills-next');
+
+            if (!track || cards.length === 0) return;
+
+            let currentIndex = 0;
+
+            // ── Track and Card Height Alignment ──────────────────────────────
+            function updateTrackHeight() {
+                let maxHeight = 0;
+                cards.forEach(card => {
+                    card.style.minHeight = 'auto';
+                    const h = card.scrollHeight;
+                    if (h > maxHeight) maxHeight = h;
+                });
+                if (maxHeight > 0) {
+                    track.style.height = `${maxHeight}px`;
+                    cards.forEach(card => {
+                        card.style.minHeight = `${maxHeight}px`;
+                    });
+                }
+            }
+
+            // ── Dots ─────────────────────────────────────────────────────────
+            function renderDots() {
+                dotsContainer.innerHTML = '';
+                if (cards.length <= 1) {
+                    dotsContainer.style.display = 'none';
+                    if (prevBtn) prevBtn.style.display = 'none';
+                    if (nextBtn) nextBtn.style.display = 'none';
+                    return;
+                }
+                cards.forEach((_, i) => {
+                    const dot = document.createElement('button');
+                    dot.classList.add('slider-dot');
+                    dot.setAttribute('aria-label', `Go to category slide ${i + 1}`);
+                    if (i === currentIndex) dot.classList.add('active');
+                    dot.addEventListener('click', () => goToSlide(i));
+                    dotsContainer.appendChild(dot);
+                });
+            }
+
+            // ── 3D Cylindric Positioning Engine ──────────────────────────────
+            function applyCylindricTransforms(dragProgress = 0) {
+                const W = carousel.offsetWidth;
+                const isMobile = W < 640;
+                const isTablet = W >= 640 && W < 1000;
+
+                // Cylindrical geometry parameters
+                const xStep = isMobile ? W * 0.70 : (isTablet ? W * 0.52 : Math.min(500, W * 0.43));
+                const zPush = isMobile ? -140 : -190;
+                const rotAngle = isMobile ? 30 : 34;
+                const sideScale = isMobile ? 0.88 : 0.86;
+
+                cards.forEach((card, i) => {
+                    let offset = i - currentIndex;
+                    if (cards.length > 2) {
+                        const half = cards.length / 2;
+                        while (offset > half) offset -= cards.length;
+                        while (offset < -half) offset += cards.length;
+                    }
+
+                    const effectiveOffset = offset + dragProgress;
+                    const absOffset = Math.abs(effectiveOffset);
+
+                    let x = 0;
+                    let z = 0;
+                    let rotateY = 0;
+                    let scale = 1;
+                    let opacity = 1;
+                    let filter = 'none';
+                    let zIndex = 10;
+                    let pointerEvents = 'none';
+
+                    if (absOffset < 0.05) {
+                        // Front face of cylinder
+                        x = 0;
+                        z = 0;
+                        rotateY = 0;
+                        scale = 1;
+                        opacity = 1;
+                        filter = 'none';
+                        zIndex = 20;
+                        pointerEvents = 'auto';
+                        card.classList.add('is-active');
+                    } else if (absOffset <= 1.4) {
+                        // Visible curved sides along cylinder wall
+                        const sign = effectiveOffset > 0 ? 1 : -1;
+                        const factor = Math.min(1.2, absOffset);
+                        x = sign * xStep * factor;
+                        z = zPush * factor;
+                        rotateY = -sign * rotAngle * factor;
+                        scale = 1 - (1 - sideScale) * factor;
+                        opacity = Math.max(0.25, 1 - 0.45 * factor);
+                        filter = absOffset > 0.45 ? 'blur(0.5px)' : 'none';
+                        zIndex = Math.round(15 - factor * 6);
+                        pointerEvents = 'auto';
+                        card.classList.remove('is-active');
+                    } else {
+                        // Rear of cylinder (hidden or deep in background)
+                        const sign = effectiveOffset > 0 ? 1 : -1;
+                        x = sign * xStep * 1.6;
+                        z = zPush * 2.2;
+                        rotateY = -sign * 55;
+                        scale = 0.72;
+                        opacity = 0;
+                        filter = 'blur(2px)';
+                        zIndex = 1;
+                        pointerEvents = 'none';
+                        card.classList.remove('is-active');
+                    }
+
+                    card.style.transform = `translateX(-50%) translate3d(${x.toFixed(1)}px, 0, ${z.toFixed(1)}px) rotateY(${rotateY.toFixed(1)}deg) scale(${scale.toFixed(3)})`;
+                    card.style.opacity = opacity.toFixed(2);
+                    card.style.filter = filter;
+                    card.style.zIndex = zIndex;
+                    card.style.pointerEvents = pointerEvents;
+                });
+
+                // Update dots
+                Array.from(dotsContainer.querySelectorAll('.slider-dot'))
+                    .forEach((dot, i) => dot.classList.toggle('active', i === currentIndex));
+
+                // Update boundary arrows if 2 or fewer cards
+                if (cards.length <= 2) {
+                    if (prevBtn) prevBtn.disabled = (currentIndex === 0);
+                    if (nextBtn) nextBtn.disabled = (currentIndex === cards.length - 1);
+                } else {
+                    if (prevBtn) prevBtn.disabled = false;
+                    if (nextBtn) nextBtn.disabled = false;
+                }
+            }
+
+            function goToSlide(idx) {
+                if (cards.length > 2) {
+                    currentIndex = (idx + cards.length) % cards.length;
+                } else {
+                    currentIndex = Math.max(0, Math.min(idx, cards.length - 1));
+                }
+                cards.forEach(card => {
+                    card.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                });
+                applyCylindricTransforms(0);
+            }
+
+            // Click on peeking side cards to bring them to front
+            cards.forEach((card, i) => {
+                card.addEventListener('click', (e) => {
+                    if (card.classList.contains('is-active')) return;
+                    let offset = i - currentIndex;
+                    if (cards.length > 2) {
+                        const half = cards.length / 2;
+                        while (offset > half) offset -= cards.length;
+                        while (offset < -half) offset += cards.length;
+                    }
+                    if (offset === -1) {
+                        e.preventDefault();
+                        goToSlide(currentIndex - 1);
+                    } else if (offset === 1) {
+                        e.preventDefault();
+                        goToSlide(currentIndex + 1);
+                    }
+                });
+            });
+
+            if (prevBtn) {
+                prevBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    goToSlide(currentIndex - 1);
+                });
+            }
+
+            if (nextBtn) {
+                nextBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    goToSlide(currentIndex + 1);
+                });
+            }
+
+            // Keyboard navigation
+            carousel.setAttribute('tabindex', '0');
+            carousel.style.outline = 'none';
+            carousel.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    goToSlide(currentIndex - 1);
+                } else if (e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    goToSlide(currentIndex + 1);
+                }
+            });
+
+            // ── 3D Cylindrical Drag & Touch Swipe ─────────────────────────────
+            let isDragging = false;
+            let startX = 0;
+            let startY = 0;
+            let dragProgress = 0;
+            let isHorizontalSwipe = null;
+
+            // Desktop Mouse Drag
+            track.style.cursor = 'grab';
+
+            track.addEventListener('mousedown', e => {
+                if (e.button !== 0) return;
+                isDragging = true;
+                startX = e.clientX;
+                dragProgress = 0;
+                track.style.cursor = 'grabbing';
+                cards.forEach(card => card.style.transition = 'none');
+            });
+
+            window.addEventListener('mousemove', e => {
+                if (!isDragging) return;
+                const diffX = e.clientX - startX;
+                dragProgress = diffX / (carousel.offsetWidth * 0.65);
+                applyCylindricTransforms(dragProgress);
+            });
+
+            window.addEventListener('mouseup', () => {
+                if (!isDragging) return;
+                isDragging = false;
+                track.style.cursor = 'grab';
+                cards.forEach(card => {
+                    card.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                });
+                if (dragProgress < -0.12) {
+                    goToSlide(currentIndex + 1);
+                } else if (dragProgress > 0.12) {
+                    goToSlide(currentIndex - 1);
+                } else {
+                    applyCylindricTransforms(0);
+                }
+                dragProgress = 0;
+            });
+
+            // Mobile Touch Swipe
+            track.addEventListener('touchstart', e => {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                dragProgress = 0;
+                isHorizontalSwipe = null;
+                cards.forEach(card => card.style.transition = 'none');
+            }, { passive: true });
+
+            track.addEventListener('touchmove', e => {
+                const diffX = e.touches[0].clientX - startX;
+                const diffY = e.touches[0].clientY - startY;
+
+                if (isHorizontalSwipe === null) {
+                    if (Math.abs(diffX) > 8 || Math.abs(diffY) > 8) {
+                        isHorizontalSwipe = Math.abs(diffX) > Math.abs(diffY);
+                    }
+                }
+
+                if (isHorizontalSwipe) {
+                    if (e.cancelable) e.preventDefault();
+                    dragProgress = diffX / (carousel.offsetWidth * 0.65);
+                    applyCylindricTransforms(dragProgress);
+                }
+            }, { passive: false });
+
+            track.addEventListener('touchend', () => {
+                cards.forEach(card => {
+                    card.style.transition = 'transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), opacity 0.6s cubic-bezier(0.2, 0.8, 0.2, 1), filter 0.6s cubic-bezier(0.2, 0.8, 0.2, 1)';
+                });
+                if (isHorizontalSwipe) {
+                    if (dragProgress < -0.12) {
+                        goToSlide(currentIndex + 1);
+                    } else if (dragProgress > 0.12) {
+                        goToSlide(currentIndex - 1);
+                    } else {
+                        applyCylindricTransforms(0);
+                    }
+                } else {
+                    applyCylindricTransforms(0);
+                }
+                isHorizontalSwipe = null;
+                dragProgress = 0;
+            });
+
+            // ── Resize & Init ─────────────────────────────────────────────────
+            function initCylindricCarousel() {
+                updateTrackHeight();
+                renderDots();
+                applyCylindricTransforms(0);
+            }
+
+            initCylindricCarousel();
+            window.addEventListener('resize', () => {
+                updateTrackHeight();
+                applyCylindricTransforms(0);
+            });
+            window.addEventListener('load', () => {
+                updateTrackHeight();
+                applyCylindricTransforms(0);
+            });
+        })();
+
+    </script>
+</body>
+
+</html>

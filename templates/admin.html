@@ -1,0 +1,1485 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard | Portfolio Management</title>
+    <link rel="icon" type="image/png" href="/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/favicon-96x96.png">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    {% if theme_colors %}
+    <style id="custom-theme-vars">
+        :root {
+            --primary: {{ theme_colors.primary.final }};
+            --primary-light: {{ theme_colors.primary_light.final }};
+            --secondary: {{ theme_colors.secondary.final }};
+            --accent: {{ theme_colors.accent.final }};
+            --bg-darker: {{ theme_colors.bg_darker.final }};
+            --bg-dark: {{ theme_colors.bg_dark.final }};
+            --text-main: {{ theme_colors.text_main.final }};
+            --text-dim: {{ theme_colors.text_dim.final }};
+        }
+    </style>
+    {% endif %}
+</head>
+
+<body style="background: var(--bg-dark);">
+    <div class="admin-wrapper">
+        <!-- Mobile Header -->
+        <div class="admin-mobile-header">
+            <div class="logo">
+                <span class="text-gradient">ADMIN</span>
+            </div>
+            <button class="admin-sidebar-toggle" id="sidebarToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+
+        <!-- Sidebar -->
+        <aside class="sidebar" id="adminSidebar">
+            <div class="sidebar-header">
+                <a href="#overview" class="sidebar-brand">
+                    <span class="brand-badge"><i class="fas fa-shield-alt"></i></span>
+                    <div class="brand-text">
+                        <span class="text-gradient">ADMIN</span> PANEL
+                    </div>
+                </a>
+                <button class="admin-sidebar-close" id="sidebarClose" aria-label="Close sidebar">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+
+            <!-- Scrollable Navigation Buttons -->
+            <div class="admin-nav-container">
+                <!-- Group 1: General -->
+                <div class="admin-nav-group-title">Main</div>
+                <a href="#overview" class="admin-nav-item active">
+                    <span class="nav-icon"><i class="fas fa-chart-line"></i></span>
+                    <span class="nav-label">Overview</span>
+                </a>
+
+                <!-- Group 2: Appearance & Styling -->
+                <div class="admin-nav-group-title">Design & Branding</div>
+                <a href="#profile" class="admin-nav-item">
+                    <span class="nav-icon"><i class="fas fa-user-circle"></i></span>
+                    <span class="nav-label">Profile Settings</span>
+                </a>
+                <a href="#background" class="admin-nav-item">
+                    <span class="nav-icon"><i class="fas fa-image"></i></span>
+                    <span class="nav-label">Background Studio</span>
+                </a>
+                <a href="#theme" class="admin-nav-item">
+                    <span class="nav-icon"><i class="fas fa-palette"></i></span>
+                    <span class="nav-label">Colors & Theme</span>
+                </a>
+
+                <!-- Group 3: Portfolio Content -->
+                <div class="admin-nav-group-title">Portfolio Content</div>
+                <a href="#projects" class="admin-nav-item">
+                    <span class="nav-icon"><i class="fas fa-rocket"></i></span>
+                    <span class="nav-label">Projects</span>
+                    {% if projects %}<span class="nav-count-badge">{{ projects|length }}</span>{% endif %}
+                </a>
+                <a href="#skills" class="admin-nav-item">
+                    <span class="nav-icon"><i class="fas fa-tools"></i></span>
+                    <span class="nav-label">Technical Skills</span>
+                    {% if skills %}<span class="nav-count-badge">{{ skills|length }}</span>{% endif %}
+                </a>
+                <a href="#education" class="admin-nav-item">
+                    <span class="nav-icon"><i class="fas fa-graduation-cap"></i></span>
+                    <span class="nav-label">Education</span>
+                    {% if education %}<span class="nav-count-badge">{{ education|length }}</span>{% endif %}
+                </a>
+                <a href="#certificates" class="admin-nav-item">
+                    <span class="nav-icon"><i class="fas fa-certificate"></i></span>
+                    <span class="nav-label">Certificates</span>
+                    {% if certificates %}<span class="nav-count-badge">{{ certificates|length }}</span>{% endif %}
+                </a>
+
+                <!-- Group 4: Account & Security -->
+                <div class="admin-nav-group-title">Security</div>
+                <a href="#credentials" class="admin-nav-item">
+                    <span class="nav-icon"><i class="fas fa-key"></i></span>
+                    <span class="nav-label">Credentials</span>
+                </a>
+            </div>
+
+            <!-- Bottom Actions Pinned Footer -->
+            <div class="admin-sidebar-footer">
+                <a href="{{ url_for('index') }}" class="admin-footer-btn site-btn" target="_blank" title="View Public Website">
+                    <i class="fas fa-external-link-alt"></i> <span>View Site</span>
+                </a>
+                <a href="{{ url_for('logout') }}" class="admin-footer-btn logout-btn" title="Sign out of Admin">
+                    <i class="fas fa-sign-out-alt"></i> <span>Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="admin-main">
+            <header id="overview" class="admin-flex-between" style="margin-bottom: 2.5rem;">
+                <div>
+                    <h1 style="font-size: 2rem; margin-bottom: 0.3rem;">Dashboard <span class="text-gradient">Overview</span></h1>
+                    <p style="color: var(--text-dim); font-size: 0.95rem;">Manage your portfolio content and design system</p>
+                </div>
+                <a href="{{ url_for('index') }}" class="btn btn-secondary" target="_blank">
+                    <i class="fas fa-external-link-alt"></i> View Site
+                </a>
+            </header>
+
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            {% for message in messages %}
+            <div class="glass-card"
+                style="margin-bottom: 2rem; border-left: 4px solid var(--primary); padding: 1rem 1.5rem;">
+                <p style="color: var(--primary); margin: 0; font-weight: 600;"><i class="fas fa-info-circle"></i> {{
+                    message }}</p>
+            </div>
+            {% endfor %}
+            {% endif %}
+            {% endwith %}
+
+            <!-- Profile Management -->
+            <section id="profile" style="padding: 0; margin-bottom: 3rem;">
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 2rem;"><i class="fas fa-user-circle" style="color: var(--primary);"></i>
+                        Profile Settings</h3>
+                    <form action="{{ url_for('update_profile') }}" method="POST">
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" name="name" value="{{ profile.name if profile else '' }}"
+                                    placeholder="Your full name..." required>
+                            </div>
+                            <div class="form-group">
+                                <label>Greeting Tagline</label>
+                                <input type="text" name="greeting" value="{{ profile.greeting if profile else '' }}"
+                                    placeholder="e.g. Hello, I'm" required>
+                            </div>
+                        </div>
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Hero Photo URL</label>
+                                <input type="text" name="photo_url" value="{{ profile.photo_url if profile else '' }}"
+                                    placeholder="Hero photo link..." required>
+                            </div>
+                            <div class="form-group">
+                                <label>About Photo URL</label>
+                                <input type="text" name="about_image_url"
+                                    value="{{ profile.about_image_url if profile else '' }}"
+                                    placeholder="About photo link..." required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fas fa-image" style="color: var(--primary);"></i> Background Image URL <span style="font-weight: normal; color: var(--text-dim);">(Optional - overrides default gradient, or use <a href="#background" style="color: var(--primary); text-decoration: underline;">Background Studio</a> below)</span></label>
+                            <input type="text" name="background_image_url" value="{{ profile.background_image_url if profile and profile.background_image_url else '' }}"
+                                placeholder="https://... or /static/uploads/... (leave empty for default gradient)">
+                        </div>
+                        <div class="form-group">
+                            <label>Hero Tagline / Description (Supports HTML highlights)</label>
+                            <textarea name="tagline" rows="3" placeholder="Tell us about yourself..." required>{{ profile.tagline if profile else '' }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>About Intro Paragraph (Supports HTML highlights)</label>
+                            <textarea name="about_intro" rows="3" placeholder="Intro paragraph on About section..." required>{{ profile.about_intro if profile else '' }}</textarea>
+                        </div>
+                        <div class="form-group">
+                            <label>About Description Paragraph (Supports HTML highlights)</label>
+                            <textarea name="about_text" rows="3" placeholder="Secondary description paragraph on About section..." required>{{ profile.about_text if profile else '' }}</textarea>
+                        </div>
+                        
+                        <h4 style="margin-top: 2rem; margin-bottom: 1rem; color: var(--primary);"><i class="fas fa-chart-bar"></i> About Section Stats</h4>
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Stat 1 Value</label>
+                                <input type="text" name="stat_1_value" value="{{ profile.stat_1_value if profile else '' }}"
+                                    placeholder="e.g. 3+" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Stat 1 Label</label>
+                                <input type="text" name="stat_1_label" value="{{ profile.stat_1_label if profile else '' }}"
+                                    placeholder="e.g. Years project Experience" required>
+                            </div>
+                        </div>
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Stat 2 Value</label>
+                                <input type="text" name="stat_2_value" value="{{ profile.stat_2_value if profile else '' }}"
+                                    placeholder="e.g. 6+" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Stat 2 Label</label>
+                                <input type="text" name="stat_2_label" value="{{ profile.stat_2_label if profile else '' }}"
+                                    placeholder="e.g. Projects Completed" required>
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary" style="margin-top: 2rem; width: 100%; justify-content: center;">
+                            <i class="fas fa-sync"></i> Update Profile Settings
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Background Image Management Area -->
+            <section id="background" style="padding: 0; margin-bottom: 3rem;">
+                <div class="glass-card">
+                    <div class="admin-flex-between" style="margin-bottom: 1.5rem;">
+                        <div>
+                            <h3 style="margin-bottom: 0.3rem;"><i class="fas fa-image" style="color: var(--primary);"></i> Background Image Studio</h3>
+                            <p style="color: var(--text-dim); font-size: 0.9rem;">Set a custom image background for your portfolio or reset to the clean default gradient.</p>
+                        </div>
+                        {% if profile and profile.background_image_url %}
+                        <span class="badge" style="background: rgba(16, 185, 129, 0.15); color: #059669; padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid rgba(16, 185, 129, 0.3);">
+                            <i class="fas fa-check-circle"></i> Custom Image Active
+                        </span>
+                        {% else %}
+                        <span class="badge" style="background: rgba(56, 189, 248, 0.15); color: var(--primary); padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid rgba(56, 189, 248, 0.3);">
+                            <i class="fas fa-palette"></i> Default Gradient Active
+                        </span>
+                        {% endif %}
+                    </div>
+
+                    <!-- Live Background Preview Box -->
+                    <div class="bg-preview-wrapper" style="margin-bottom: 2rem;">
+                        <label style="display: block; margin-bottom: 0.6rem; font-weight: 600; font-size: 0.95rem;">
+                            <i class="fas fa-eye" style="color: var(--primary);"></i> Real-Time Background Preview
+                        </label>
+                        <div id="bgPreviewBox" class="bg-preview-card">
+                            
+                            <div style="background: rgba(11, 17, 33, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); padding: 1.2rem 2rem; border-radius: 12px; border: 1px solid rgba(56, 189, 248, 0.35); text-align: center; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5); max-width: 90%;">
+                                <div style="font-weight: 800; font-size: 1.25rem; color: var(--text-main); margin-bottom: 0.2rem;">
+                                    <span class="text-gradient">STEBY</span> VARGHESE
+                                </div>
+                                <div style="font-size: 0.85rem; color: var(--text-dim);" id="bgPreviewStatusText">
+                                    {% if profile and profile.background_image_url %}
+                                        Custom Background Active: {{ profile.background_image_url[:45] }}{% if profile.background_image_url|length > 45 %}...{% endif %}
+                                    {% else %}
+                                        Default Aurora Gradient Active (No Image)
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Background Form -->
+                    <form action="{{ url_for('update_background') }}" method="POST" enctype="multipart/form-data">
+                        <div class="admin-grid-2">
+                            <!-- Option 1: URL Input -->
+                            <div class="form-group">
+                                <label for="bg_url_input">
+                                    <i class="fas fa-link" style="color: var(--primary);"></i> Background Image URL
+                                </label>
+                                <input type="text" id="bg_url_input" name="background_image_url"
+                                       value="{{ profile.background_image_url if profile and profile.background_image_url else '' }}"
+                                       placeholder="https://images.unsplash.com/... or /static/uploads/milky_way_galaxy.jpg">
+                                <small style="color: var(--text-dim); display: block; margin-top: 0.35rem; font-size: 0.8rem;">
+                                    Direct image link or local path (/static/uploads/milky_way_galaxy.jpg).
+                                </small>
+                            </div>
+
+                            <!-- Option 2: File Upload -->
+                            <div class="form-group">
+                                <label for="bg_file_input">
+                                    <i class="fas fa-upload" style="color: var(--primary);"></i> Or Upload Local Image
+                                </label>
+                                <input type="file" id="bg_file_input" name="background_file" accept="image/*"
+                                       style="padding: 0.55rem; background: rgba(11, 17, 33, 0.75); font-size: 0.9rem;">
+                                <small style="color: var(--text-dim); display: block; margin-top: 0.35rem; font-size: 0.8rem;">
+                                    Uploads directly to your portfolio (/static/uploads). Supports JPG, PNG, WebP.
+                                </small>
+                            </div>
+                        </div>
+
+                        <!-- Overlay Tint Adjustment -->
+                        <div class="form-group" style="margin-top: 0.5rem;">
+                            <label for="bg_overlay_input" style="display: flex; justify-content: space-between; align-items: center;">
+                                <span><i class="fas fa-adjust" style="color: var(--primary);"></i> Dark Glass Overlay Tint (Enhances text contrast)</span>
+                                <span id="overlayValDisplay" style="font-weight: 700; color: var(--primary);">{{ ((profile.background_overlay|float)*100)|int if profile and profile.background_overlay else 55 }}%</span>
+                            </label>
+                            <input type="range" id="bg_overlay_input" name="background_overlay" min="0.1" max="0.95" step="0.05"
+                                   value="{{ profile.background_overlay if profile and profile.background_overlay else '0.55' }}"
+                                   style="width: 100%; accent-color: var(--primary); cursor: pointer;">
+                            <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dim); margin-top: 0.25rem;">
+                                <span>Vibrant Image (10%)</span>
+                                <span>Balanced Glass (55% - Recommended for Galaxy)</span>
+                                <span>Soft Dark Tint (95%)</span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Presets -->
+                        <div style="margin-top: 1.5rem; margin-bottom: 2rem;">
+                            <label style="display: block; margin-bottom: 0.7rem; font-size: 0.9rem; font-weight: 600;">
+                                <i class="fas fa-magic" style="color: var(--primary);"></i> One-Click Wallpaper Presets (Click any to try)
+                            </label>
+                            <div class="preset-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 0.8rem;">
+                                <!-- Milky Way Galaxy (User's Image) -->
+                                <div class="preset-card" onclick="selectPreset('/static/uploads/milky_way_galaxy.jpg', 'Milky Way Galaxy'); applyPresetTheme('cosmic'); document.getElementById('bg_overlay_input').value='0.55'; document.getElementById('overlayValDisplay').textContent='55%';" style="cursor: pointer; border-radius: 8px; overflow: hidden; border: 2px solid var(--primary); text-align: center; background: rgba(5, 8, 20, 0.9); transition: transform 0.2s, border-color 0.2s; position: relative;">
+                                    <div style="position: absolute; top: 3px; right: 3px; background: var(--primary); color: #050814; font-size: 0.65rem; padding: 1px 4px; border-radius: 3px; font-weight: 800;">FEATURED</div>
+                                    <div style="height: 60px; background-image: url('/static/uploads/milky_way_galaxy.jpg'); background-size: cover; background-position: center;"></div>
+                                    <div style="padding: 0.4rem; font-size: 0.75rem; font-weight: 700; color: var(--primary);">Milky Way Galaxy</div>
+                                </div>
+                                <div class="preset-card" onclick="selectPreset('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1920&q=80', 'Cyber Matrix')" style="cursor: pointer; border-radius: 8px; overflow: hidden; border: 1px solid var(--glass-border); text-align: center; background: rgba(11, 17, 33, 0.75); transition: transform 0.2s, border-color 0.2s;">
+                                    <div style="height: 60px; background-image: url('https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=300&q=80'); background-size: cover; background-position: center;"></div>
+                                    <div style="padding: 0.4rem; font-size: 0.75rem; font-weight: 600;">Cyber Matrix</div>
+                                </div>
+                                <div class="preset-card" onclick="selectPreset('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1920&q=80', 'SOC Cyber')" style="cursor: pointer; border-radius: 8px; overflow: hidden; border: 1px solid var(--glass-border); text-align: center; background: rgba(11, 17, 33, 0.75); transition: transform 0.2s, border-color 0.2s;">
+                                    <div style="height: 60px; background-image: url('https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=300&q=80'); background-size: cover; background-position: center;"></div>
+                                    <div style="padding: 0.4rem; font-size: 0.75rem; font-weight: 600;">SOC Tech</div>
+                                </div>
+                                <div class="preset-card" onclick="selectPreset('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1920&q=80', 'Microchip')" style="cursor: pointer; border-radius: 8px; overflow: hidden; border: 1px solid var(--glass-border); text-align: center; background: rgba(11, 17, 33, 0.75); transition: transform 0.2s, border-color 0.2s;">
+                                    <div style="height: 60px; background-image: url('https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=300&q=80'); background-size: cover; background-position: center;"></div>
+                                    <div style="padding: 0.4rem; font-size: 0.75rem; font-weight: 600;">Circuit Board</div>
+                                </div>
+                                <div class="preset-card" onclick="selectPreset('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1920&q=80', 'Network Globe')" style="cursor: pointer; border-radius: 8px; overflow: hidden; border: 1px solid var(--glass-border); text-align: center; background: rgba(11, 17, 33, 0.75); transition: transform 0.2s, border-color 0.2s;">
+                                    <div style="height: 60px; background-image: url('https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=300&q=80'); background-size: cover; background-position: center;"></div>
+                                    <div style="padding: 0.4rem; font-size: 0.75rem; font-weight: 600;">Global Network</div>
+                                </div>
+                                <div class="preset-card" onclick="selectPreset('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=1920&q=80', 'Mesh Waves')" style="cursor: pointer; border-radius: 8px; overflow: hidden; border: 1px solid var(--glass-border); text-align: center; background: rgba(11, 17, 33, 0.75); transition: transform 0.2s, border-color 0.2s;">
+                                    <div style="height: 60px; background-image: url('https://images.unsplash.com/photo-1579546929518-9e396f3cc809?auto=format&fit=crop&w=300&q=80'); background-size: cover; background-position: center;"></div>
+                                    <div style="padding: 0.4rem; font-size: 0.75rem; font-weight: 600;">Mesh Gradient</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1; min-width: 220px; justify-content: center;">
+                                <i class="fas fa-save"></i> Save Background Image
+                            </button>
+                            <button type="button" onclick="submitResetBackground()" class="btn btn-secondary" style="justify-content: center; color: var(--text-dim);">
+                                <i class="fas fa-undo"></i> Reset to Default Gradient
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Hidden form for reset -->
+                    <form id="resetBgForm" action="{{ url_for('reset_background') }}" method="POST" style="display: none;"></form>
+                </div>
+            </section>
+
+            <!-- Theme Colors & Brightness Studio -->
+            <section id="theme" style="padding: 0; margin-bottom: 3rem;">
+                <div class="glass-card">
+                    <div class="admin-flex-between" style="margin-bottom: 1.5rem;">
+                        <div>
+                            <h3 style="margin-bottom: 0.3rem;"><i class="fas fa-palette" style="color: var(--primary);"></i> Colors & Brightness Studio</h3>
+                            <p style="color: var(--text-dim); font-size: 0.9rem;">Fine-tune every color of your portfolio with color changers and individual brightness increasers.</p>
+                        </div>
+                        <span class="badge" style="background: rgba(2, 132, 199, 0.12); color: var(--primary); padding: 0.4rem 0.9rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 0.4rem; border: 1px solid rgba(2, 132, 199, 0.25);">
+                            <i class="fas fa-magic"></i> Live Theme Studio
+                        </span>
+                    </div>
+
+                    <!-- Live Theme Component Preview -->
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; margin-bottom: 0.6rem; font-weight: 600; font-size: 0.95rem;">
+                            <i class="fas fa-eye" style="color: var(--primary);"></i> Live Real-Time Palette Preview
+                        </label>
+                        <div id="themePreviewBox" style="padding: 1.5rem; border-radius: 16px; border: 1px solid var(--glass-border); background: var(--bg-darker); transition: all 0.3s ease;">
+                            <div style="background: var(--bg-dark); border: 1px solid var(--glass-border); border-radius: 12px; padding: 1.5rem; box-shadow: 0 10px 30px rgba(0,0,0,0.06);">
+                                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; margin-bottom: 1rem;">
+                                    <div>
+                                        <h4 style="margin: 0; font-size: 1.3rem; color: var(--text-main);" id="previewHeading">
+                                            Steby Varghese · <span class="text-gradient">Portfolio Preview</span>
+                                        </h4>
+                                        <p style="margin: 0.2rem 0 0 0; font-size: 0.85rem; color: var(--text-dim);" id="previewSubtext">
+                                            Sample subtitle showcasing secondary and muted text colors.
+                                        </p>
+                                    </div>
+                                    <div style="display: flex; gap: 0.6rem; align-items: center;">
+                                        <span style="background: var(--accent); color: #ffffff; padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700;" id="previewAccentBadge">
+                                            Accent Badge
+                                        </span>
+                                        <button type="button" class="btn btn-primary" style="padding: 0.4rem 1rem; font-size: 0.85rem;" id="previewPrimaryBtn">
+                                            Primary Button
+                                        </button>
+                                    </div>
+                                </div>
+                                <div style="display: flex; gap: 0.8rem; flex-wrap: wrap;">
+                                    <div style="padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.7); border: 1px solid var(--glass-border); font-size: 0.8rem; color: var(--text-main);">
+                                        <i class="fas fa-check-circle" style="color: var(--primary); margin-right: 0.4rem;"></i> Brand Color Sync
+                                    </div>
+                                    <div style="padding: 0.5rem 1rem; border-radius: 8px; background: rgba(255,255,255,0.7); border: 1px solid var(--glass-border); font-size: 0.8rem; color: var(--text-main);">
+                                        <i class="fas fa-sun" style="color: var(--secondary); margin-right: 0.4rem;"></i> Dynamic Lightness
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Curated Theme Palettes -->
+                    <div style="margin-bottom: 2rem;">
+                        <label style="display: block; margin-bottom: 0.7rem; font-size: 0.9rem; font-weight: 600;">
+                            <i class="fas fa-swatchbook" style="color: var(--primary);"></i> One-Click Curated Palettes
+                        </label>
+                        <div style="display: flex; gap: 0.6rem; flex-wrap: wrap;">
+                            <button type="button" class="theme-palette-pill" onclick="applyPresetTheme('cosmic')" style="border-color: #38bdf8; background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-weight: 700;">
+                                <span style="width: 12px; height: 12px; border-radius: 50%; background: linear-gradient(135deg, #38bdf8, #f59e0b); display: inline-block;"></span>
+                                ★ Cosmic Starlight (Milky Way)
+                            </button>
+                            <button type="button" class="theme-palette-pill" onclick="applyPresetTheme('midnight')">
+                                <span style="width: 12px; height: 12px; border-radius: 50%; background: #38bdf8; display: inline-block;"></span>
+                                Midnight Dark
+                            </button>
+                            <button type="button" class="theme-palette-pill" onclick="applyPresetTheme('cyber')">
+                                <span style="width: 12px; height: 12px; border-radius: 50%; background: #8b5cf6; display: inline-block;"></span>
+                                Cyber Neon Purple
+                            </button>
+                            <button type="button" class="theme-palette-pill" onclick="applyPresetTheme('ocean')">
+                                <span style="width: 12px; height: 12px; border-radius: 50%; background: #0284c7; display: inline-block;"></span>
+                                Ocean Cyan
+                            </button>
+                            <button type="button" class="theme-palette-pill" onclick="applyPresetTheme('emerald')">
+                                <span style="width: 12px; height: 12px; border-radius: 50%; background: #059669; display: inline-block;"></span>
+                                Emerald Matrix
+                            </button>
+                            <button type="button" class="theme-palette-pill" onclick="applyPresetTheme('sunset')">
+                                <span style="width: 12px; height: 12px; border-radius: 50%; background: #e11d48; display: inline-block;"></span>
+                                Sunset Crimson
+                            </button>
+                            <button type="button" class="theme-palette-pill" onclick="applyPresetTheme('solar')">
+                                <span style="width: 12px; height: 12px; border-radius: 50%; background: #d97706; display: inline-block;"></span>
+                                Solar Amber
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Color & Brightness Form -->
+                    <form action="{{ url_for('update_theme') }}" method="POST">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.2rem; margin-bottom: 2rem;">
+                            
+                            <!-- 1. Primary Color -->
+                            <div class="color-control-card">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Primary Color</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);">Main brand buttons & highlights</div>
+                                    </div>
+                                    <div id="swatch_primary" class="color-swatch-box" data-color="{{ theme_colors.primary.final }}" title="Calculated result"></div>
+                                </div>
+                                <div style="display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.9rem;">
+                                    <input type="color" id="picker_primary" name="color_primary" value="{{ theme_colors.primary.base }}" style="width: 46px; height: 38px; padding: 2px; border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer; background: transparent;">
+                                    <input type="text" id="hex_primary" value="{{ theme_colors.primary.base }}" maxlength="7" style="flex: 1; padding: 0.45rem 0.75rem; font-family: monospace; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                        <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-main);"><i class="fas fa-sun" style="color: #f59e0b;"></i> Brightness</label>
+                                        <span id="badge_primary" style="font-size: 0.75rem; font-weight: 700; color: var(--primary); background: rgba(2, 132, 199, 0.1); padding: 0.15rem 0.5rem; border-radius: 6px;">{{ theme_colors.primary.brightness }}%</span>
+                                    </div>
+                                    <input type="range" id="bright_primary" name="brightness_primary" min="30" max="200" step="5" value="{{ theme_colors.primary.brightness }}" style="width: 100%; accent-color: var(--primary); cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-dim); margin-top: 0.15rem;">
+                                        <span>30% Dim</span><span>100% Normal</span><span>200% Bright</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Primary Light -->
+                            <div class="color-control-card">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Primary Light</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);">Glows, card borders & active tints</div>
+                                    </div>
+                                    <div id="swatch_primary_light" class="color-swatch-box" data-color="{{ theme_colors.primary_light.final }}" title="Calculated result"></div>
+                                </div>
+                                <div style="display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.9rem;">
+                                    <input type="color" id="picker_primary_light" name="color_primary_light" value="{{ theme_colors.primary_light.base }}" style="width: 46px; height: 38px; padding: 2px; border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer; background: transparent;">
+                                    <input type="text" id="hex_primary_light" value="{{ theme_colors.primary_light.base }}" maxlength="7" style="flex: 1; padding: 0.45rem 0.75rem; font-family: monospace; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                        <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-main);"><i class="fas fa-sun" style="color: #f59e0b;"></i> Brightness</label>
+                                        <span id="badge_primary_light" style="font-size: 0.75rem; font-weight: 700; color: var(--primary); background: rgba(2, 132, 199, 0.1); padding: 0.15rem 0.5rem; border-radius: 6px;">{{ theme_colors.primary_light.brightness }}%</span>
+                                    </div>
+                                    <input type="range" id="bright_primary_light" name="brightness_primary_light" min="30" max="200" step="5" value="{{ theme_colors.primary_light.brightness }}" style="width: 100%; accent-color: var(--primary); cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-dim); margin-top: 0.15rem;">
+                                        <span>30% Dim</span><span>100% Normal</span><span>200% Bright</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Secondary Color -->
+                            <div class="color-control-card">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Secondary Color</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);">Gradient stops & secondary accents</div>
+                                    </div>
+                                    <div id="swatch_secondary" class="color-swatch-box" data-color="{{ theme_colors.secondary.final }}" title="Calculated result"></div>
+                                </div>
+                                <div style="display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.9rem;">
+                                    <input type="color" id="picker_secondary" name="color_secondary" value="{{ theme_colors.secondary.base }}" style="width: 46px; height: 38px; padding: 2px; border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer; background: transparent;">
+                                    <input type="text" id="hex_secondary" value="{{ theme_colors.secondary.base }}" maxlength="7" style="flex: 1; padding: 0.45rem 0.75rem; font-family: monospace; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                        <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-main);"><i class="fas fa-sun" style="color: #f59e0b;"></i> Brightness</label>
+                                        <span id="badge_secondary" style="font-size: 0.75rem; font-weight: 700; color: var(--primary); background: rgba(2, 132, 199, 0.1); padding: 0.15rem 0.5rem; border-radius: 6px;">{{ theme_colors.secondary.brightness }}%</span>
+                                    </div>
+                                    <input type="range" id="bright_secondary" name="brightness_secondary" min="30" max="200" step="5" value="{{ theme_colors.secondary.brightness }}" style="width: 100%; accent-color: var(--primary); cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-dim); margin-top: 0.15rem;">
+                                        <span>30% Dim</span><span>100% Normal</span><span>200% Bright</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 4. Accent Color -->
+                            <div class="color-control-card">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Accent Color</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);">Badges, icons & active pill highlights</div>
+                                    </div>
+                                    <div id="swatch_accent" class="color-swatch-box" data-color="{{ theme_colors.accent.final }}" title="Calculated result"></div>
+                                </div>
+                                <div style="display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.9rem;">
+                                    <input type="color" id="picker_accent" name="color_accent" value="{{ theme_colors.accent.base }}" style="width: 46px; height: 38px; padding: 2px; border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer; background: transparent;">
+                                    <input type="text" id="hex_accent" value="{{ theme_colors.accent.base }}" maxlength="7" style="flex: 1; padding: 0.45rem 0.75rem; font-family: monospace; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                        <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-main);"><i class="fas fa-sun" style="color: #f59e0b;"></i> Brightness</label>
+                                        <span id="badge_accent" style="font-size: 0.75rem; font-weight: 700; color: var(--primary); background: rgba(2, 132, 199, 0.1); padding: 0.15rem 0.5rem; border-radius: 6px;">{{ theme_colors.accent.brightness }}%</span>
+                                    </div>
+                                    <input type="range" id="bright_accent" name="brightness_accent" min="30" max="200" step="5" value="{{ theme_colors.accent.brightness }}" style="width: 100%; accent-color: var(--primary); cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-dim); margin-top: 0.15rem;">
+                                        <span>30% Dim</span><span>100% Normal</span><span>200% Bright</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 5. Background Base -->
+                            <div class="color-control-card">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Background Base</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);">Main page backdrop tone (--bg-darker)</div>
+                                    </div>
+                                    <div id="swatch_bg_darker" class="color-swatch-box" data-color="{{ theme_colors.bg_darker.final }}" title="Calculated result"></div>
+                                </div>
+                                <div style="display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.9rem;">
+                                    <input type="color" id="picker_bg_darker" name="color_bg_darker" value="{{ theme_colors.bg_darker.base }}" style="width: 46px; height: 38px; padding: 2px; border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer; background: transparent;">
+                                    <input type="text" id="hex_bg_darker" value="{{ theme_colors.bg_darker.base }}" maxlength="7" style="flex: 1; padding: 0.45rem 0.75rem; font-family: monospace; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                        <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-main);"><i class="fas fa-sun" style="color: #f59e0b;"></i> Brightness</label>
+                                        <span id="badge_bg_darker" style="font-size: 0.75rem; font-weight: 700; color: var(--primary); background: rgba(2, 132, 199, 0.1); padding: 0.15rem 0.5rem; border-radius: 6px;">{{ theme_colors.bg_darker.brightness }}%</span>
+                                    </div>
+                                    <input type="range" id="bright_bg_darker" name="brightness_bg_darker" min="30" max="200" step="5" value="{{ theme_colors.bg_darker.brightness }}" style="width: 100%; accent-color: var(--primary); cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-dim); margin-top: 0.15rem;">
+                                        <span>30% Dim</span><span>100% Normal</span><span>200% Bright</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 6. Background Secondary -->
+                            <div class="color-control-card">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Background Secondary</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);">Cards & container tone (--bg-dark)</div>
+                                    </div>
+                                    <div id="swatch_bg_dark" class="color-swatch-box" data-color="{{ theme_colors.bg_dark.final }}" title="Calculated result"></div>
+                                </div>
+                                <div style="display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.9rem;">
+                                    <input type="color" id="picker_bg_dark" name="color_bg_dark" value="{{ theme_colors.bg_dark.base }}" style="width: 46px; height: 38px; padding: 2px; border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer; background: transparent;">
+                                    <input type="text" id="hex_bg_dark" value="{{ theme_colors.bg_dark.base }}" maxlength="7" style="flex: 1; padding: 0.45rem 0.75rem; font-family: monospace; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                        <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-main);"><i class="fas fa-sun" style="color: #f59e0b;"></i> Brightness</label>
+                                        <span id="badge_bg_dark" style="font-size: 0.75rem; font-weight: 700; color: var(--primary); background: rgba(2, 132, 199, 0.1); padding: 0.15rem 0.5rem; border-radius: 6px;">{{ theme_colors.bg_dark.brightness }}%</span>
+                                    </div>
+                                    <input type="range" id="bright_bg_dark" name="brightness_bg_dark" min="30" max="200" step="5" value="{{ theme_colors.bg_dark.brightness }}" style="width: 100%; accent-color: var(--primary); cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-dim); margin-top: 0.15rem;">
+                                        <span>30% Dim</span><span>100% Normal</span><span>200% Bright</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 7. Text Main -->
+                            <div class="color-control-card">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Text Main Color</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);">Headings, titles & primary content</div>
+                                    </div>
+                                    <div id="swatch_text_main" class="color-swatch-box" data-color="{{ theme_colors.text_main.final }}" title="Calculated result"></div>
+                                </div>
+                                <div style="display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.9rem;">
+                                    <input type="color" id="picker_text_main" name="color_text_main" value="{{ theme_colors.text_main.base }}" style="width: 46px; height: 38px; padding: 2px; border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer; background: transparent;">
+                                    <input type="text" id="hex_text_main" value="{{ theme_colors.text_main.base }}" maxlength="7" style="flex: 1; padding: 0.45rem 0.75rem; font-family: monospace; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                        <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-main);"><i class="fas fa-sun" style="color: #f59e0b;"></i> Brightness</label>
+                                        <span id="badge_text_main" style="font-size: 0.75rem; font-weight: 700; color: var(--primary); background: rgba(2, 132, 199, 0.1); padding: 0.15rem 0.5rem; border-radius: 6px;">{{ theme_colors.text_main.brightness }}%</span>
+                                    </div>
+                                    <input type="range" id="bright_text_main" name="brightness_text_main" min="30" max="200" step="5" value="{{ theme_colors.text_main.brightness }}" style="width: 100%; accent-color: var(--primary); cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-dim); margin-top: 0.15rem;">
+                                        <span>30% Dim</span><span>100% Normal</span><span>200% Bright</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 8. Text Dim -->
+                            <div class="color-control-card">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.8rem;">
+                                    <div>
+                                        <div style="font-weight: 700; font-size: 0.95rem; color: var(--text-main);">Text Dim / Muted</div>
+                                        <div style="font-size: 0.75rem; color: var(--text-dim);">Subtitles, body copy & descriptions</div>
+                                    </div>
+                                    <div id="swatch_text_dim" class="color-swatch-box" data-color="{{ theme_colors.text_dim.final }}" title="Calculated result"></div>
+                                </div>
+                                <div style="display: flex; gap: 0.6rem; align-items: center; margin-bottom: 0.9rem;">
+                                    <input type="color" id="picker_text_dim" name="color_text_dim" value="{{ theme_colors.text_dim.base }}" style="width: 46px; height: 38px; padding: 2px; border-radius: 8px; border: 1px solid var(--glass-border); cursor: pointer; background: transparent;">
+                                    <input type="text" id="hex_text_dim" value="{{ theme_colors.text_dim.base }}" maxlength="7" style="flex: 1; padding: 0.45rem 0.75rem; font-family: monospace; font-size: 0.85rem; font-weight: 600; text-transform: uppercase;">
+                                </div>
+                                <div>
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.25rem;">
+                                        <label style="font-size: 0.8rem; font-weight: 600; color: var(--text-main);"><i class="fas fa-sun" style="color: #f59e0b;"></i> Brightness</label>
+                                        <span id="badge_text_dim" style="font-size: 0.75rem; font-weight: 700; color: var(--primary); background: rgba(2, 132, 199, 0.1); padding: 0.15rem 0.5rem; border-radius: 6px;">{{ theme_colors.text_dim.brightness }}%</span>
+                                    </div>
+                                    <input type="range" id="bright_text_dim" name="brightness_text_dim" min="30" max="200" step="5" value="{{ theme_colors.text_dim.brightness }}" style="width: 100%; accent-color: var(--primary); cursor: pointer;">
+                                    <div style="display: flex; justify-content: space-between; font-size: 0.7rem; color: var(--text-dim); margin-top: 0.15rem;">
+                                        <span>30% Dim</span><span>100% Normal</span><span>200% Bright</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+
+                        <!-- Submit & Reset Buttons -->
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button type="submit" class="btn btn-primary" style="flex: 1; min-width: 220px; justify-content: center;">
+                                <i class="fas fa-save"></i> Save Color Scheme & Brightness
+                            </button>
+                            <button type="button" onclick="submitResetTheme()" class="btn btn-secondary" style="justify-content: center; color: var(--text-dim);">
+                                <i class="fas fa-undo"></i> Reset All Colors to Default
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Hidden form for resetting theme -->
+                    <form id="resetThemeForm" action="{{ url_for('reset_theme') }}" method="POST" style="display: none;"></form>
+                </div>
+            </section>
+
+            <!-- Overview Stats -->
+            <section id="overview" style="padding: 0; margin-bottom: 4rem;">
+                <div class="admin-grid-stats">
+                    <div class="glass-card" style="text-align: center; padding: 1.5rem;">
+                        <i class="fas fa-rocket"
+                            style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                        <h2 style="font-size: 2.5rem;">{{ projects|length }}</h2>
+                        <p style="color: var(--text-dim);">Live Projects</p>
+                    </div>
+                    <div class="glass-card" style="text-align: center; padding: 1.5rem;">
+                        <i class="fas fa-tools" style="font-size: 2rem; color: var(--accent); margin-bottom: 1rem;"></i>
+                        <h2 style="font-size: 2.5rem;">{{ skills|length }}</h2>
+                        <p style="color: var(--text-dim);">Tech Skills</p>
+                    </div>
+                    <div class="glass-card" style="text-align: center; padding: 1.5rem;">
+                        <i class="fas fa-graduation-cap"
+                            style="font-size: 2rem; color: var(--secondary); margin-bottom: 1rem;"></i>
+                        <h2 style="font-size: 2.5rem;">{{ education|length }}</h2>
+                        <p style="color: var(--text-dim);">Education</p>
+                    </div>
+                    <div class="glass-card" style="text-align: center; padding: 1.5rem;">
+                        <i class="fas fa-certificate"
+                            style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                        <h2 style="font-size: 2.5rem;">{{ certificates|length }}</h2>
+                        <p style="color: var(--text-dim);">Certificates</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Projects Management -->
+            <section id="projects" style="padding: 0; margin-bottom: 4rem;">
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 2rem;"><i class="fas fa-plus-circle" style="color: var(--primary);"></i>
+                        Add New Project</h3>
+                    <form action="{{ url_for('add_project') }}" method="POST">
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Project Title</label>
+                                <input type="text" name="title" placeholder="e.g. Virtual Mouse" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Image URL</label>
+                                <input type="text" name="image_url" placeholder="https://..." required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="description" rows="3" placeholder="Tell us about the project..."
+                                required></textarea>
+                        </div>
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Technologies (Comma separated)</label>
+                                <input type="text" name="technologies" placeholder="Python, Flask, React">
+                            </div>
+                            <div class="form-group">
+                                <label>Project Code Link</label>
+                                <input type="text" name="link" placeholder="GitHub URL (Optional)">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Preview Link (Optional)</label>
+                                <input type="text" name="preview_link" placeholder="Live Preview/Demo URL">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                            <i class="fas fa-save"></i> Published Project
+                        </button>
+                    </form>
+                </div>
+
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 1.5rem;">Recent Projects</h3>
+                    <div style="overflow-x: auto;">
+                        <table style="width: 100%; border-collapse: collapse; text-align: left;">
+                            <thead>
+                                <tr style="border-bottom: 1px solid var(--glass-border);">
+                                    <th style="padding: 1rem; color: var(--text-dim);">Title</th>
+                                    <th style="padding: 1rem; color: var(--text-dim);">Technologies</th>
+                                    <th style="padding: 1rem; color: var(--text-dim);">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for project in projects %}
+                                <tr style="border-bottom: 1px solid var(--glass-border);">
+                                    <td style="padding: 1rem; font-weight: 600;">{{ project.title }}</td>
+                                    <td style="padding: 1rem;">
+                                        {% for tech in project.technologies.split(',') %}
+                                        <span
+                                            style="font-size: 0.7rem; background: rgba(0, 242, 254, 0.1); color: var(--primary); padding: 0.2rem 0.5rem; border-radius: 4px; margin-right: 0.3rem;">{{
+                                            tech.strip() }}</span>
+                                        {% endfor %}
+                                    </td>
+                                    <td style="padding: 1rem; display: flex; gap: 0.8rem; align-items: center;">
+                                        <a href="{{ url_for('move_project', id=project.id, direction='up') }}"
+                                            title="Move Up" style="color: var(--primary);"><i
+                                                class="fas fa-chevron-up"></i></a>
+                                        <a href="{{ url_for('move_project', id=project.id, direction='down') }}"
+                                            title="Move Down" style="color: var(--primary);"><i
+                                                class="fas fa-chevron-down"></i></a>
+
+                                        <button class="edit-project-btn" data-id="{{ project.id }}"
+                                            data-title="{{ project.title }}" data-image="{{ project.image_url }}"
+                                            data-desc="{{ project.description }}" data-tech="{{ project.technologies }}"
+                                            data-link="{{ project.link }}" data-preview="{{ project.preview_link }}"
+                                            title="Edit Project"
+                                            style="background: none; border: none; cursor: pointer; color: var(--accent); font-size: 1rem; padding: 0;"><i
+                                                class="fas fa-edit"></i></button>
+
+                                        <a href="{{ url_for('delete_project', id=project.id) }}"
+                                            style="color: #ff4d4d; text-decoration: none;"
+                                            onclick="return confirm('Delete this project?')" title="Delete">
+                                            <i class="fas fa-trash-alt"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Edit Project Modal -->
+                <div id="editProjectModal" class="glass-card"
+                    style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; width: 95%; max-width: 800px; max-height: 90vh; overflow-y: auto; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); box-shadow: 0 20px 80px rgba(2, 132, 199, 0.25); border: 1px solid var(--glass-border);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h3><i class="fas fa-edit" style="color: var(--accent);"></i> Edit Project</h3>
+                        <button type="button" onclick="document.getElementById('editProjectModal').style.display='none'"
+                            style="background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.5rem;"><i
+                                class="fas fa-times"></i></button>
+                    </div>
+                    <form id="editProjectForm" action="" method="POST">
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Project Title</label>
+                                <input type="text" name="title" id="edit-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Image URL</label>
+                                <input type="text" name="image_url" id="edit-image_url" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Description</label>
+                            <textarea name="description" id="edit-description" rows="3" required></textarea>
+                        </div>
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Technologies (Comma separated)</label>
+                                <input type="text" name="technologies" id="edit-technologies">
+                            </div>
+                            <div class="form-group">
+                                <label>Project Code Link</label>
+                                <input type="text" name="link" id="edit-link">
+                            </div>
+                            <div class="form-group" style="grid-column: 1 / -1;">
+                                <label>Preview Link (Optional)</label>
+                                <input type="text" name="preview_link" id="edit-preview_link">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary"
+                            style="margin-top: 1rem; width: 100%; justify-content: center;">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Skills Management -->
+            <section id="skills" style="padding: 0; margin-bottom: 4rem;">
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 2rem;"><i class="fas fa-tools" style="color: var(--primary);"></i> Add
+                        Skill</h3>
+                    <form action="{{ url_for('add_skill') }}" method="POST">
+                        <div class="admin-grid-2">
+                            <div class="form-group" style="margin: 0;">
+                                <label>Skill Name</label>
+                                <input type="text" name="name" placeholder="e.g. Python" required>
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label>Category</label>
+                                <select name="category" id="skill-category-select" required>
+                                    <option value="" disabled selected>Select Category</option>
+                                    {% for category in categories %}
+                                    <option value="{{ category }}">{{ category }}</option>
+                                    {% endfor %}
+                                    <option value="__new__">+ Add New Category...</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group" id="new-category-group" style="margin-top: 1.5rem; display: none;">
+                            <label>New Category Name</label>
+                            <input type="text" name="new_category" id="new-category-input" placeholder="e.g. Databases">
+                        </div>
+                        <div class="admin-grid-2" style="margin-top: 1.5rem; align-items: flex-end;">
+                            <div class="form-group" style="margin: 0;">
+                                <label>Logo URL (Optional)</label>
+                                <input type="text" name="logo_url" placeholder="https://... or /static/img/...">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="height: fit-content;">Add Skill</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="admin-grid-stats">
+                    {% for skill in skills %}
+                    <div class="glass-card admin-flex-between" style="padding: 1.5rem; align-items: center;">
+                        <div style="display: flex; gap: 1rem; align-items: center;">
+                            {% if skill.logo_url %}
+                            <img src="{{ skill.logo_url }}" alt="{{ skill.name }}" style="width: 32px; height: 32px; object-fit: contain; border-radius: 4px; background: rgba(255, 255, 255, 0.05); padding: 2px; border: 1px solid var(--glass-border);">
+                            {% else %}
+                            <div style="width: 32px; height: 32px; border-radius: 4px; background: rgba(0, 242, 254, 0.05); display: flex; align-items: center; justify-content: center; border: 1px solid rgba(0, 242, 254, 0.15);">
+                                <i class="fas fa-tools" style="color: var(--primary); font-size: 0.9rem;"></i>
+                            </div>
+                            {% endif %}
+                            <div>
+                                <h4 style="margin: 0;">{{ skill.name }}</h4>
+                                <p style="font-size: 0.8rem; color: var(--text-dim); margin: 0;">{{ skill.category }}</p>
+                            </div>
+                        </div>
+                        <a href="{{ url_for('delete_skill', id=skill.id) }}" style="color: #ff4d4d;"
+                            onclick="return confirm('Delete skill?')">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </section>
+
+            <!-- Education Management -->
+            <section id="education" style="padding: 0; margin-bottom: 4rem;">
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 2rem;"><i class="fas fa-graduation-cap"
+                            style="color: var(--primary);"></i> Add Education</h3>
+                    <form action="{{ url_for('add_education') }}" method="POST">
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Degree</label>
+                                <input type="text" name="degree" placeholder="e.g. Bachelor of CS" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Institution</label>
+                                <input type="text" name="institution" placeholder="e.g. University of..." required>
+                            </div>
+                        </div>
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Duration</label>
+                                <input type="text" name="duration" placeholder="e.g. 2021 - 2024">
+                            </div>
+                            <div class="form-group">
+                                <label>Logo URL (Optional)</label>
+                                <input type="text" name="logo_url" placeholder="https://... or /static/img/...">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Add Education</button>
+                    </form>
+                </div>
+
+                {% for edu in education %}
+                <div class="glass-card admin-flex-between" style="margin-bottom: 1.5rem; align-items: center;">
+                    <div style="display: flex; gap: 1.5rem; align-items: center;">
+                        {% if edu.logo_url %}
+                        <img src="{{ edu.logo_url }}" alt="Logo" style="width: 50px; height: 50px; object-fit: contain; border-radius: 8px; background: rgba(255, 255, 255, 0.05); padding: 5px; flex-shrink: 0; border: 1px solid var(--glass-border);">
+                        {% else %}
+                        <div style="width: 50px; height: 50px; border-radius: 8px; background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="fas fa-graduation-cap" style="color: var(--primary); font-size: 1.2rem;"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h4 style="margin: 0;">{{ edu.degree }}</h4>
+                            <p style="color: var(--primary); font-size: 0.9rem;">{{ edu.institution }}</p>
+                            <p style="font-size: 0.8rem; opacity: 0.6;">{{ edu.duration }}</p>
+                        </div>
+                    </div>
+                    <a href="{{ url_for('delete_education', id=edu.id) }}" style="color: #ff4d4d;"
+                        onclick="return confirm('Delete education entry?')">
+                        <i class="fas fa-trash"></i>
+                    </a>
+                </div>
+                {% endfor %}
+            </section>
+
+            <!-- Certificates Management -->
+            <section id="certificates" style="padding: 0; margin-bottom: 4rem;">
+                <div class="glass-card" style="margin-bottom: 2rem;">
+                    <h3 style="margin-bottom: 2rem;"><i class="fas fa-certificate"
+                            style="color: var(--primary);"></i> Add Certificate</h3>
+                    <form action="{{ url_for('add_certificate') }}" method="POST">
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Certificate Title</label>
+                                <input type="text" name="title" placeholder="e.g. AWS Certified Solutions Architect" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Issuing Organization</label>
+                                <input type="text" name="issuer" placeholder="e.g. Amazon Web Services" required>
+                            </div>
+                        </div>
+                        <div class="admin-grid-3-auto" style="grid-template-columns: 1fr 1.5fr auto; align-items: flex-end;">
+                            <div class="form-group" style="margin: 0;">
+                                <label>Date Earned</label>
+                                <input type="text" name="date_earned" placeholder="e.g. Aug 2024">
+                            </div>
+                            <div class="form-group" style="margin: 0;">
+                                <label>Credential URL</label>
+                                <input type="text" name="credential_link" placeholder="Verification link...">
+                            </div>
+                            <button type="submit" class="btn btn-primary" style="height: fit-content; padding: 0.8rem 1.8rem;">Add Certificate</button>
+                        </div>
+                        <div class="form-group" style="margin-top: 1.5rem;">
+                            <label>Certificate Image URL (Optional)</label>
+                            <input type="text" name="logo_url" placeholder="https://... or certificate image link">
+                        </div>
+                    </form>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin: 2rem 0 1.2rem 0;">
+                    <h3 style="margin: 0;"><i class="fas fa-list" style="color: var(--primary);"></i> Current Certificates</h3>
+                    <span style="color: var(--text-dim); font-size: 0.85rem;"><i class="fas fa-arrows-alt-v"></i> Use arrows to reorder</span>
+                </div>
+
+                {% if not certificates %}
+                <div class="glass-card" style="text-align: center; padding: 2rem; color: var(--text-dim); margin-bottom: 2rem;">
+                    <p style="margin: 0;"><i class="fas fa-info-circle"></i> No certificates added yet.</p>
+                </div>
+                {% endif %}
+
+                {% for cert in certificates %}
+                <div class="glass-card admin-flex-between" style="margin-bottom: 1.5rem; align-items: center;">
+                    <div style="display: flex; gap: 1.5rem; align-items: center;">
+                        {% if cert.logo_url %}
+                        <img src="{{ cert.logo_url }}" alt="Logo" style="width: 50px; height: 50px; object-fit: contain; border-radius: 8px; background: rgba(255, 255, 255, 0.05); padding: 5px; flex-shrink: 0; border: 1px solid var(--glass-border);">
+                        {% else %}
+                        <div style="width: 50px; height: 50px; border-radius: 8px; background: rgba(0, 242, 254, 0.05); border: 1px solid rgba(0, 242, 254, 0.15); display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                            <i class="fas fa-certificate" style="color: var(--primary); font-size: 1.2rem;"></i>
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h4 style="margin: 0;">{{ cert.title }}</h4>
+                            <p style="color: var(--primary); font-size: 0.9rem;">{{ cert.issuer }}</p>
+                            <p style="font-size: 0.8rem; opacity: 0.6;">{{ cert.date_earned }}</p>
+                        </div>
+                    </div>
+                    <div style="display: flex; gap: 0.8rem; align-items: center;">
+                        <a href="{{ url_for('move_certificate', id=cert.id, direction='up') }}"
+                            title="Move Up" style="color: var(--primary);"><i
+                                class="fas fa-chevron-up"></i></a>
+                        <a href="{{ url_for('move_certificate', id=cert.id, direction='down') }}"
+                            title="Move Down" style="color: var(--primary);"><i
+                                class="fas fa-chevron-down"></i></a>
+
+                        <button class="edit-cert-btn" data-id="{{ cert.id }}"
+                            data-title="{{ cert.title }}" data-issuer="{{ cert.issuer }}"
+                            data-date="{{ cert.date_earned if cert.date_earned else '' }}"
+                            data-link="{{ cert.credential_link if cert.credential_link else '' }}"
+                            data-logo="{{ cert.logo_url if cert.logo_url else '' }}"
+                            title="Edit Certificate"
+                            style="background: none; border: none; cursor: pointer; color: var(--accent); font-size: 1rem; padding: 0;"><i
+                                class="fas fa-edit"></i></button>
+
+                        <a href="{{ cert.credential_link if cert.credential_link else '#' }}" target="_blank" class="btn btn-primary" 
+                           {% if not cert.credential_link or cert.credential_link == '#' %}
+                           style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px; font-weight: 600; pointer-events: none; opacity: 0.5;"
+                           {% else %}
+                           style="padding: 0.5rem 1rem; font-size: 0.85rem; border-radius: 8px; font-weight: 600;"
+                           {% endif %}
+                           title="Verify Credential">
+                            <span>Verify</span>
+                            <i class="fas fa-external-link-alt" style="font-size: 0.75rem;"></i>
+                        </a>
+                        <a href="{{ url_for('delete_certificate', id=cert.id) }}" style="color: #ff4d4d; text-decoration: none;"
+                            onclick="return confirm('Delete certificate entry?')" title="Delete">
+                            <i class="fas fa-trash-alt"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endfor %}
+
+                <!-- Edit Certificate Modal -->
+                <div id="editCertModal" class="glass-card"
+                    style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; width: 95%; max-width: 700px; max-height: 90vh; overflow-y: auto; background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px); box-shadow: 0 20px 80px rgba(2, 132, 199, 0.25); border: 1px solid var(--glass-border);">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                        <h3><i class="fas fa-edit" style="color: var(--accent);"></i> Edit Certificate</h3>
+                        <button type="button" onclick="document.getElementById('editCertModal').style.display='none'"
+                            style="background: none; border: none; color: var(--text-dim); cursor: pointer; font-size: 1.5rem;"><i
+                                class="fas fa-times"></i></button>
+                    </div>
+                    <form id="editCertForm" action="" method="POST">
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Certificate Title</label>
+                                <input type="text" name="title" id="edit-cert-title" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Issuing Organization</label>
+                                <input type="text" name="issuer" id="edit-cert-issuer" required>
+                            </div>
+                        </div>
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>Date Earned</label>
+                                <input type="text" name="date_earned" id="edit-cert-date">
+                            </div>
+                            <div class="form-group">
+                                <label>Credential URL</label>
+                                <input type="text" name="credential_link" id="edit-cert-link">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Certificate Image URL (Optional)</label>
+                            <input type="text" name="logo_url" id="edit-cert-logo">
+                        </div>
+                        <button type="submit" class="btn btn-primary"
+                            style="margin-top: 1rem; width: 100%; justify-content: center;">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <!-- Credentials Management -->
+            <section id="credentials" style="padding: 0;">
+                <div class="glass-card">
+                    <h3 style="margin-bottom: 2rem;"><i class="fas fa-key" style="color: var(--primary);"></i> Update
+                        Credentials</h3>
+                    <form action="{{ url_for('update_credentials') }}" method="POST">
+                        <div class="admin-grid-2">
+                            <div class="form-group">
+                                <label>New Username</label>
+                                <input type="text" name="username"
+                                    value="{{ current_admin.username if current_admin else '' }}"
+                                    placeholder="Keep current or change..." required>
+                            </div>
+                            <div class="form-group">
+                                <label>New Password</label>
+                                <input type="password" name="password" placeholder="Leave blank to keep current...">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </form>
+                </div>
+            </section>
+        </main>
+    </div>
+    <script>
+        // Sidebar Toggle Logic
+        const sidebar = document.getElementById('adminSidebar');
+        const sidebarToggle = document.getElementById('sidebarToggle');
+        const sidebarClose = document.getElementById('sidebarClose');
+
+        sidebarToggle.addEventListener('click', () => {
+            sidebar.classList.add('active');
+        });
+
+        sidebarClose.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+        });
+
+        // Sidebar active state highlights & smooth navigation
+        const navItems = document.querySelectorAll('.admin-nav-item');
+        const sections = document.querySelectorAll('main section, main header#overview');
+
+        navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                const href = item.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    e.preventDefault();
+                    const targetEl = document.querySelector(href);
+                    if (targetEl) {
+                        targetEl.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'start'
+                        });
+                        navItems.forEach(i => i.classList.remove('active'));
+                        item.classList.add('active');
+                    }
+                }
+                if (window.innerWidth <= 968) {
+                    sidebar.classList.remove('active');
+                }
+            });
+        });
+
+        window.addEventListener('scroll', () => {
+            let current = 'overview';
+            sections.forEach(section => {
+                const sectionTop = section.offsetTop;
+                if (window.pageYOffset >= sectionTop - 160) {
+                    current = section.getAttribute('id');
+                }
+            });
+
+            navItems.forEach(item => {
+                const href = item.getAttribute('href');
+                if (href && href.startsWith('#')) {
+                    const sectionId = href.substring(1);
+                    if (sectionId === current) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                }
+            });
+        });
+
+        // Edit Project Modal Logic
+        const editBtns = document.querySelectorAll('.edit-project-btn');
+        const editModal = document.getElementById('editProjectModal');
+        const editForm = document.getElementById('editProjectForm');
+
+        editBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                editForm.action = '/admin/project/edit/' + btn.dataset.id;
+                document.getElementById('edit-title').value = btn.dataset.title !== 'None' ? btn.dataset.title : '';
+                document.getElementById('edit-image_url').value = btn.dataset.image !== 'None' ? btn.dataset.image : '';
+                document.getElementById('edit-description').value = btn.dataset.desc !== 'None' ? btn.dataset.desc : '';
+                document.getElementById('edit-technologies').value = btn.dataset.tech !== 'None' ? btn.dataset.tech : '';
+
+                // Keep empty instead of "None" for links
+                document.getElementById('edit-link').value = btn.dataset.link !== 'None' ? btn.dataset.link : '';
+                document.getElementById('edit-preview_link').value = btn.dataset.preview !== 'None' ? btn.dataset.preview : '';
+
+                editModal.style.display = 'block';
+            });
+        });
+
+        // Edit Certificate Modal Logic
+        const editCertBtns = document.querySelectorAll('.edit-cert-btn');
+        const editCertModal = document.getElementById('editCertModal');
+        const editCertForm = document.getElementById('editCertForm');
+
+        if (editCertBtns && editCertModal && editCertForm) {
+            editCertBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    editCertForm.action = '/admin/certificate/edit/' + btn.dataset.id;
+                    document.getElementById('edit-cert-title').value = btn.dataset.title !== 'None' ? btn.dataset.title : '';
+                    document.getElementById('edit-cert-issuer').value = btn.dataset.issuer !== 'None' ? btn.dataset.issuer : '';
+                    document.getElementById('edit-cert-date').value = btn.dataset.date !== 'None' ? btn.dataset.date : '';
+                    document.getElementById('edit-cert-link').value = btn.dataset.link !== 'None' ? btn.dataset.link : '';
+                    document.getElementById('edit-cert-logo').value = btn.dataset.logo !== 'None' ? btn.dataset.logo : '';
+
+                    editCertModal.style.display = 'block';
+                });
+            });
+        }
+
+        // Skill Category Select toggle logic
+        const skillCategorySelect = document.getElementById('skill-category-select');
+        if (skillCategorySelect) {
+            skillCategorySelect.addEventListener('change', function() {
+                const newCatGroup = document.getElementById('new-category-group');
+                const newCatInput = document.getElementById('new-category-input');
+                if (this.value === '__new__') {
+                    newCatGroup.style.display = 'block';
+                    newCatInput.setAttribute('required', 'required');
+                    newCatInput.focus();
+                } else {
+                    newCatGroup.style.display = 'none';
+                    newCatInput.removeAttribute('required');
+                }
+            });
+        }
+
+        // Close modals when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === editModal) {
+                editModal.style.display = 'none';
+            }
+            if (editCertModal && e.target === editCertModal) {
+                editCertModal.style.display = 'none';
+            }
+        });
+
+        // ── Background Studio Live Preview Logic ──
+        const bgUrlInput = document.getElementById('bg_url_input');
+        const bgFileInput = document.getElementById('bg_file_input');
+        const bgOverlayInput = document.getElementById('bg_overlay_input');
+        const overlayValDisplay = document.getElementById('overlayValDisplay');
+        const bgPreviewBox = document.getElementById('bgPreviewBox');
+        const bgPreviewStatusText = document.getElementById('bgPreviewStatusText');
+
+        function updateBgPreview(url) {
+            const overlay = bgOverlayInput ? bgOverlayInput.value : '0.55';
+            if (url && url.trim() !== '') {
+                bgPreviewBox.style.background = `linear-gradient(rgba(5, 8, 20, ${overlay}), rgba(10, 15, 30, ${overlay})), url('${url.trim()}') center/cover no-repeat`;
+                if (bgPreviewStatusText) {
+                    bgPreviewStatusText.textContent = 'Previewing: Custom Background (' + (url.length > 40 ? url.substring(0, 40) + '...' : url) + ')';
+                }
+            } else {
+                bgPreviewBox.style.background = 'radial-gradient(circle at 12% 15%, rgba(56, 189, 248, 0.25) 0%, transparent 45%), radial-gradient(circle at 88% 18%, rgba(245, 158, 11, 0.20) 0%, transparent 45%), linear-gradient(135deg, rgba(11, 17, 33, 0.95) 0%, rgba(5, 8, 20, 0.98) 100%)';
+                if (bgPreviewStatusText) {
+                    bgPreviewStatusText.textContent = 'Default Aurora Gradient Active (No Image)';
+                }
+            }
+        }
+
+        if (bgUrlInput) {
+            bgUrlInput.addEventListener('input', () => {
+                updateBgPreview(bgUrlInput.value);
+            });
+        }
+
+        if (bgFileInput) {
+            bgFileInput.addEventListener('change', function() {
+                if (this.files && this.files[0]) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        updateBgPreview(e.target.result);
+                        if (bgPreviewStatusText) {
+                            bgPreviewStatusText.textContent = 'Previewing Local File: ' + bgFileInput.files[0].name;
+                        }
+                    };
+                    reader.readAsDataURL(this.files[0]);
+                }
+            });
+        }
+
+        if (bgOverlayInput) {
+            bgOverlayInput.addEventListener('input', function() {
+                if (overlayValDisplay) {
+                    overlayValDisplay.textContent = Math.round(parseFloat(this.value) * 100) + '%';
+                }
+                const currentUrl = bgUrlInput ? bgUrlInput.value : '';
+                updateBgPreview(currentUrl);
+            });
+        }
+
+        function selectPreset(url, title) {
+            if (bgUrlInput) {
+                bgUrlInput.value = url;
+                updateBgPreview(url);
+                if (bgPreviewStatusText) {
+                    bgPreviewStatusText.textContent = 'Selected Preset: ' + title;
+                }
+            }
+        }
+
+        function submitResetBackground() {
+            if (confirm('Reset background to the default clean gradient?')) {
+                document.getElementById('resetBgForm').submit();
+            }
+        }
+
+        // Initialize preview on load
+        if (bgUrlInput) {
+            updateBgPreview(bgUrlInput.value);
+        }
+
+        // ── Color Changer & Brightness Increaser Engine ──
+        const colorKeys = ['primary', 'primary_light', 'secondary', 'accent', 'bg_darker', 'bg_dark', 'text_main', 'text_dim'];
+
+        const colorPresets = {
+            cosmic: {
+                primary: '#38bdf8', primary_light: '#7dd3fc', secondary: '#f59e0b', accent: '#38bdf8',
+                bg_darker: '#050814', bg_dark: '#0d1527', text_main: '#f8fafc', text_dim: '#cbd5e1'
+            },
+            midnight: {
+                primary: '#38bdf8', primary_light: '#7dd3fc', secondary: '#0ea5e9', accent: '#38bdf8',
+                bg_darker: '#0b0f19', bg_dark: '#111827', text_main: '#f8fafc', text_dim: '#94a3b8'
+            },
+            cyber: {
+                primary: '#8b5cf6', primary_light: '#c084fc', secondary: '#d946ef', accent: '#a855f7',
+                bg_darker: '#0f0c1b', bg_dark: '#1e1735', text_main: '#f8fafc', text_dim: '#94a3b8'
+            },
+            ocean: {
+                primary: '#0284c7', primary_light: '#38bdf8', secondary: '#0ea5e9', accent: '#0284c7',
+                bg_darker: '#f0f9ff', bg_dark: '#e0f2fe', text_main: '#0f172a', text_dim: '#475569'
+            },
+            emerald: {
+                primary: '#059669', primary_light: '#34d399', secondary: '#10b981', accent: '#059669',
+                bg_darker: '#061a12', bg_dark: '#0b2e20', text_main: '#ecfdf5', text_dim: '#6ee7b7'
+            },
+            sunset: {
+                primary: '#e11d48', primary_light: '#fb7185', secondary: '#f43f5e', accent: '#be123c',
+                bg_darker: '#fff1f2', bg_dark: '#ffe4e6', text_main: '#1e1014', text_dim: '#881337'
+            },
+            solar: {
+                primary: '#d97706', primary_light: '#fbbf24', secondary: '#f59e0b', accent: '#b45309',
+                bg_darker: '#fffbeb', bg_dark: '#fef3c7', text_main: '#1f1604', text_dim: '#78350f'
+            }
+        };
+
+        function adjustColorBrightness(hex, percent) {
+            hex = hex.replace('#', '');
+            if (hex.length === 3) hex = hex.split('').map(c => c + c).join('');
+            let r = parseInt(hex.substring(0, 2), 16) || 0;
+            let g = parseInt(hex.substring(2, 4), 16) || 0;
+            let b = parseInt(hex.substring(4, 6), 16) || 0;
+
+            let factor = percent / 100;
+            if (factor <= 1.0) {
+                r = Math.round(r * factor);
+                g = Math.round(g * factor);
+                b = Math.round(b * factor);
+            } else {
+                let boost = factor - 1.0;
+                r = Math.round(r + (255 - r) * boost * 0.75);
+                g = Math.round(g + (255 - g) * boost * 0.75);
+                b = Math.round(b + (255 - b) * boost * 0.75);
+            }
+            r = Math.min(255, Math.max(0, r));
+            g = Math.min(255, Math.max(0, g));
+            b = Math.min(255, Math.max(0, b));
+
+            const toHex = c => c.toString(16).padStart(2, '0');
+            return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        }
+
+        function updateColorItem(key) {
+            const picker = document.getElementById('picker_' + key);
+            const hexInput = document.getElementById('hex_' + key);
+            const brightSlider = document.getElementById('bright_' + key);
+            const badge = document.getElementById('badge_' + key);
+            const swatch = document.getElementById('swatch_' + key);
+
+            if (!picker || !brightSlider) return;
+
+            const baseColor = picker.value;
+            const brightness = parseInt(brightSlider.value);
+            const finalColor = adjustColorBrightness(baseColor, brightness);
+
+            if (hexInput) hexInput.value = baseColor.toUpperCase();
+            if (badge) {
+                let text = brightness + '%';
+                if (brightness > 100) text += ' (+' + (brightness - 100) + '%)';
+                else if (brightness < 100) text += ' (' + (brightness - 100) + '%)';
+                else text += ' (Normal)';
+                badge.textContent = text;
+            }
+            if (swatch) swatch.style.backgroundColor = finalColor;
+
+            // Update live CSS variable on document root
+            const cssVar = '--' + key.replace('_', '-');
+            document.documentElement.style.setProperty(cssVar, finalColor);
+            if (key === 'primary_light') {
+                document.documentElement.style.setProperty('--primary-light', finalColor);
+            }
+            if (key === 'bg_darker') {
+                document.documentElement.style.setProperty('--bg-darker', finalColor);
+            }
+            if (key === 'bg_dark') {
+                document.documentElement.style.setProperty('--bg-dark', finalColor);
+            }
+            if (key === 'text_main') {
+                document.documentElement.style.setProperty('--text-main', finalColor);
+            }
+            if (key === 'text_dim') {
+                document.documentElement.style.setProperty('--text-dim', finalColor);
+            }
+        }
+
+        colorKeys.forEach(key => {
+            const picker = document.getElementById('picker_' + key);
+            const hexInput = document.getElementById('hex_' + key);
+            const brightSlider = document.getElementById('bright_' + key);
+
+            if (picker) {
+                picker.addEventListener('input', () => {
+                    if (hexInput) hexInput.value = picker.value.toUpperCase();
+                    updateColorItem(key);
+                });
+            }
+            if (hexInput) {
+                hexInput.addEventListener('input', () => {
+                    let val = hexInput.value.trim();
+                    if (!val.startsWith('#')) val = '#' + val;
+                    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+                        if (picker) picker.value = val;
+                        updateColorItem(key);
+                    }
+                });
+            }
+            if (brightSlider) {
+                brightSlider.addEventListener('input', () => {
+                    updateColorItem(key);
+                });
+            }
+        });
+
+        function applyPresetTheme(presetName) {
+            const preset = colorPresets[presetName];
+            if (!preset) return;
+            colorKeys.forEach(key => {
+                if (preset[key]) {
+                    const picker = document.getElementById('picker_' + key);
+                    const hexInput = document.getElementById('hex_' + key);
+                    const brightSlider = document.getElementById('bright_' + key);
+                    if (picker) picker.value = preset[key];
+                    if (hexInput) hexInput.value = preset[key].toUpperCase();
+                    if (brightSlider) brightSlider.value = 100;
+                    updateColorItem(key);
+                }
+            });
+        }
+
+        function submitResetTheme() {
+            if (confirm('Reset all colors and brightness levels to system defaults?')) {
+                document.getElementById('resetThemeForm').submit();
+            }
+        }
+
+        // Initialize all color swatches on load
+        colorKeys.forEach(key => updateColorItem(key));
+    </script>
+</body>
+
+</html>
