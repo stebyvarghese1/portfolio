@@ -1,8 +1,0 @@
-Flask
-Flask-SQLAlchemy
-gunicorn
-psycopg2-binary
-psycopg[binary]
-python-dotenv
-bleach
-tinycss2
